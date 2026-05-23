@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id           String                @id @default(uuid())
+  email        String                @unique
+  createdAt    DateTime              @default(now())
+  projects     Project[]             @relation("ProjectOwner")
+  sharedWith   ProjectCollaborator[]
+}
+
+model Project {
+  id            String                @id @default(uuid())
+  title         String
+  ownerId       String
+  owner         User                  @relation("ProjectOwner", fields: [ownerId], references: [id])
+  charts        Chart[]
+  collaborators ProjectCollaborator[]
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+}
+
+model ProjectCollaborator {
+  id        String   @id @default(uuid())
+  projectId String
+  userId    String
+  role      String   @default("editor")
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([projectId, userId])
+}
+
+model Chart {
+  id          String   @id @default(uuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type        String   @default("bar")
+  title       String
+  unit        String   @default("")
+  widthMm     Float    @default(165)
+  heightMm    Float    @default(90)
+  dataFileUrl String   @default("")
+  dataJson    Json     @default("[]")
+  configJson  Json     @default("{}")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
