@@ -87,7 +87,7 @@ const LineChart = forwardRef(function LineChart({ series, unit, widthMm, heightM
           <text
             key={`ylabel-${t}`}
             x={rnd(-ML + 0.5)} y={rnd(yScale(t))}
-            dy="0.35em"
+            dy="-0.2em"
             textAnchor="start"
             {...FONT_PROPS}
           >
@@ -99,7 +99,7 @@ const LineChart = forwardRef(function LineChart({ series, unit, widthMm, heightM
         {unit && (
           <text
             x={innerW + MR - 0.5} y={rnd(yScale(ceiling))}
-            dy="0.35em"
+            dy="-0.2em"
             textAnchor="end"
             {...FONT_PROPS}
           >
