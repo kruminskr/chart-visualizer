@@ -29,7 +29,7 @@ SVG viewBox is in mm units (1 user unit = 1mm). Font/stroke values are converted
 
 ## Non-negotiable SVG constraints
 - All measurements in mm/pt — never px
-- Bar color series 1: #FF00AA (never substitute)
+- Bar color series 1: #E6007E (never substitute)
 - Font: Montserrat via Google Fonts `@import`, embedded in SVG export
 - Grid stroke-width: 0.25pt converted to mm (0.088mm)
 - Year labels: first and last = 4 digits, all middle years = 2 digits
