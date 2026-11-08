@@ -1,11 +1,10 @@
-import { createClient } from '@/lib/supabase/server';
+import { getUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import Header from '@/components/Header';
 import DashboardClient from './DashboardClient';
 
 export default async function DashboardPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
 
   const projects = await prisma.project.findMany({
     where: { ownerId: user.id },

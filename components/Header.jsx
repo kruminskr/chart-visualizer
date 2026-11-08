@@ -11,8 +11,11 @@ export default function Header({ user, projectTitle, onProjectRename, saveStatus
   const router = useRouter();
 
   async function handleLogout() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    try {
+      await createClient().auth.signOut();
+    } catch {
+      // Dev auth bypass has no real Supabase session to end.
+    }
     router.push('/login');
     router.refresh();
   }

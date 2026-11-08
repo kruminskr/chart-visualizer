@@ -44,7 +44,8 @@ export default function ProjectCard({ project, onDelete, onRename }) {
         <p className="text-sm font-medium text-gray-800 truncate">{project.title}</p>
       )}
 
-      <p className="text-xs text-gray-400 mt-1">
+      {/* Relative time differs between server render and hydration */}
+      <p className="text-xs text-gray-400 mt-1" suppressHydrationWarning>
         Edited {formatDistanceToNow(new Date(project.updatedAt), { addSuffix: true })}
       </p>
 

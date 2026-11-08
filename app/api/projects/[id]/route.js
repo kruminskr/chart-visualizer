@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 async function getAuthorizedProject(userId, projectId) {
@@ -16,8 +16,7 @@ async function getAuthorizedProject(userId, projectId) {
 }
 
 export async function GET(request, { params }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
@@ -28,15 +27,16 @@ export async function GET(request, { params }) {
 }
 
 export async function PUT(request, { params }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
   const project = await getAuthorizedProject(user.id, id);
   if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const { title } = await request.json();
+  const body = await request.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+  const { title } = body;
   const updated = await prisma.project.update({
     where: { id },
     data: { title },
@@ -46,8 +46,7 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;

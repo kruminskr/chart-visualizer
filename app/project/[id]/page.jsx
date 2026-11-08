@@ -22,6 +22,7 @@ export default function ProjectPage() {
   const [height, setHeight] = useState(90);
   const [error, setError] = useState(null);
 
+  const [loaded, setLoaded] = useState(false);
   const [saveStatus, setSaveStatus] = useState('idle');
   const saveTimerRef = useRef(null);
   const isLoadingRef = useRef(true);
@@ -31,10 +32,14 @@ export default function ProjectPage() {
 
   // ── Load project + chart on mount ──────────────────────────────────────────
   useEffect(() => {
+    // Ignore stale responses (React StrictMode double-invokes effects in dev),
+    // otherwise a late load can overwrite edits made after an upload.
+    let cancelled = false;
     async function load() {
       const res = await fetch(`/api/projects/${projectId}`);
-      if (!res.ok) return;
+      if (cancelled || !res.ok) return;
       const proj = await res.json();
+      if (cancelled) return;
       setProject(proj);
 
       if (proj.charts.length > 0) {
@@ -57,8 +62,10 @@ export default function ProjectPage() {
         }
       }
       isLoadingRef.current = false;
+      setLoaded(true);
     }
     load();
+    return () => { cancelled = true; };
   }, [projectId]);
 
   // ── Autosave ────────────────────────────────────────────────────────────────
@@ -154,6 +161,7 @@ export default function ProjectPage() {
           setWidth={setWidth} setHeight={setHeight} setError={setError}
           setChartType={setChartType}
           onDataLoaded={handleDataLoaded}
+          disabled={!loaded}
         />
 
         <main className="flex-1 flex flex-col items-center justify-center p-8 overflow-auto">
@@ -178,6 +186,8 @@ export default function ProjectPage() {
                 />
               </div>
             </div>
+          ) : !loaded ? (
+            <p className="text-sm text-gray-400">Loading…</p>
           ) : (
             <div className="text-center text-gray-400">
               <p className="text-base">Upload an Excel file to get started</p>

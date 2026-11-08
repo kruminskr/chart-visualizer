@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getUser } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request, { params }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id: projectId } = await params;
@@ -20,7 +19,8 @@ export async function POST(request, { params }) {
   });
   if (!project) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
   const chart = await prisma.chart.create({
     data: {
       projectId,

@@ -11,11 +11,13 @@ const MT = 5;
 const MB = 8;
 
 const PT = 25.4 / 72;
-const FONT = 7 * PT;
-const STROKE = 0.25 * PT;
 const DOT_R = 1; // mm
 
 const rnd = n => Math.round(n * 1000) / 1000;
+
+// pt → mm, rounded to 3 decimals (7pt = 2.469mm, 0.25pt = 0.088mm)
+const FONT = rnd(7 * PT);
+const STROKE = rnd(0.25 * PT);
 
 const FONT_PROPS = {
   fontFamily: 'Montserrat, sans-serif',

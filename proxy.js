@@ -2,6 +2,15 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 
 export async function proxy(request) {
+  // Dev-only auth bypass (see lib/auth.js). Never active in production builds.
+  if (process.env.DEV_AUTH_BYPASS === 'true' && process.env.NODE_ENV !== 'production') {
+    const { pathname } = request.nextUrl;
+    if (pathname === '/login' || pathname === '/signup') {
+      return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
@@ -43,5 +52,5 @@ export async function proxy(request) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|.*\\..*).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|api/health|.*\\..*).*)'],
 };

@@ -7,11 +7,12 @@ import { exportSVG } from '@/utils/svgExporter';
 export default function ChartControls({
   series, title, unit, width, height, error, svgRef, chartType,
   setTitle, setUnit, setWidth, setHeight, setError, setChartType,
-  onDataLoaded,
+  onDataLoaded, disabled = false,
 }) {
   const fileInputRef = useRef(null);
 
   async function handleFile(file) {
+    if (disabled) return;
     if (!file.name.toLowerCase().endsWith('.xlsx')) {
       setError('Please upload an .xlsx file.');
       return;
@@ -43,7 +44,8 @@ export default function ChartControls({
       <div
         role="button"
         tabIndex={0}
-        onClick={() => fileInputRef.current?.click()}
+        aria-disabled={disabled}
+        onClick={() => !disabled && fileInputRef.current?.click()}
         onDrop={onDrop}
         onDragOver={e => e.preventDefault()}
         onKeyDown={e => e.key === 'Enter' && fileInputRef.current?.click()}
@@ -57,6 +59,7 @@ export default function ChartControls({
           type="file"
           accept=".xlsx"
           className="hidden"
+          disabled={disabled}
           onChange={e => { if (e.target.files[0]) handleFile(e.target.files[0]); }}
         />
       </div>
