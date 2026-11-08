@@ -123,6 +123,9 @@ Order rationale: P0 unblocks everything and fixes bugs visible in every chart to
 
 ## 8. Decisions needed
 
+> The current, ready-to-send list lives in **`docs/laser-questions.md`**. The comparison against the designer's files is in `docs/svg-comparison.md`.
+
+
 **From LaSER** (questions to send, see the draft reply below): D1 text as outlines? · D2 official palette and which Igaunija pink · D3 year-label rule · D4 title/source inside the SVG? · D5 stacked: totals/flags? · D6 callouts in or out · which program opens the SVGs (Illustrator / InDesign / Word)?
 
 **From you** (see chat): scope and order of phases, workbook/fixtures in git, UI language, whether to reply to LaSER now.

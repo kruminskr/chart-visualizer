@@ -3,7 +3,7 @@
 import { forwardRef } from 'react';
 import { scalePoint, scaleLinear, line, area } from 'd3';
 import { seriesColors, tint, GRID } from '@/lib/palette';
-import { formatNumber, formatCategory, decimalsForStep, thinLabels } from '@/utils/format';
+import { formatNumber, formatCategory, decimalsForStep, thinLabels, autoDecimals } from '@/utils/format';
 import { rnd, FONT, STROKE, LINE_1, LINE_MULTI, FONT_PROPS, LEGEND_H, Legend, FontImport, textWidth, tickCount } from './common';
 
 const MR = 5;
@@ -12,7 +12,7 @@ const MARKER_R = 0.6;
 
 /**
  * Line chart. config: areaFill (single series), markers (default: on when several lines),
- * yearFormat, seriesColors, unit.
+ * valueLabels 'none'|'ends'|'all' (above the points, in the line colour), yearFormat, decimals, seriesColors, unit.
  */
 const LineChart = forwardRef(function LineChart({ data, config = {}, widthMm, heightMm }, ref) {
   const { categories, series } = data;
@@ -25,6 +25,8 @@ const LineChart = forwardRef(function LineChart({ data, config = {}, widthMm, he
   const strokeW = multi ? LINE_MULTI : LINE_1;
 
   const all = series.flatMap(s => s.values).filter(v => v != null);
+  const valueLabels = config.valueLabels ?? 'none';
+  const valueDecimals = config.decimals ?? autoDecimals(all);
   const MT = (showLegend ? LEGEND_H : 0) + FONT + 1;
   const MB = LABEL_GAP + FONT * 1.2 + 0.5;
   const nTicks = tickCount(heightMm - MT - MB);
@@ -79,6 +81,15 @@ const LineChart = forwardRef(function LineChart({ data, config = {}, widthMm, he
               {markers && s.values.map((v, i) => v != null && (
                 <circle key={i} cx={px(i)} cy={py(v)} r={MARKER_R} fill={colors[si]} />
               ))}
+              {valueLabels !== 'none' && s.values.map((v, i) => {
+                const defined = s.values.map((d, k) => (d != null ? k : null)).filter(k => k != null);
+                if (v == null || (valueLabels === 'ends' && i !== defined[0] && i !== defined.at(-1))) return null;
+                return (
+                  <text key={`v${i}`} x={px(i)} y={rnd(y(v) - 1.4)} textAnchor="middle" {...FONT_PROPS} fill={colors[si]} data-role="value">
+                    {formatNumber(v, valueDecimals)}
+                  </text>
+                );
+              })}
             </g>
           ))}
           {kept.map(({ i, k }) => (

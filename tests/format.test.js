@@ -50,3 +50,17 @@ describe('palette', () => {
     expect(tint(MAGENTA, 0.1)).toBe('#FCE5F1');
   });
 });
+
+import { sortData } from '@/components/charts/BarChart';
+describe('sortData', () => {
+  it('sorts largest first within groups, keeping group order', () => {
+    const data = {
+      categories: [{ label: 'a', group: 'LV' }, { label: 'b', group: 'LV' }, { label: 'c', group: 'EE' }, { label: 'd', group: 'EE' }],
+      series: [{ name: 's', values: [1, 5, 2, 9] }],
+    };
+    const out = sortData(data, 'desc');
+    expect(out.categories.map(c => c.label)).toEqual(['b', 'a', 'd', 'c']);
+    expect(out.series[0].values).toEqual([5, 1, 9, 2]);
+    expect(sortData(data, 'none')).toBe(data);
+  });
+});

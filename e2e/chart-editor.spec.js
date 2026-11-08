@@ -65,7 +65,7 @@ test('workbook → sheet picker → one chart per sheet', async ({ page }) => {
   await expect(dialog.getByRole('checkbox').last()).toBeDisabled(); // "notes" sheet has no data
   await dialog.getByRole('button', { name: 'Create 6 charts' }).click();
 
-  const tabs = page.getByRole('navigation', { name: 'Charts' }).getByRole('button', { name: /^(?!Delete)/ });
+  const tabs = page.getByRole('navigation', { name: 'Charts' }).getByRole('button', { name: /^(?!Delete|\+ Add)/ });
   await expect(tabs).toHaveCount(6);
 
   // Sheet 4: horizontal bars grouped by country (merged cells)
@@ -96,9 +96,27 @@ test('workbook → sheet picker → one chart per sheet', async ({ page }) => {
 test('switching to line chart and multi-series legend', async ({ page }) => {
   await createProject(page);
   const svg = await uploadFixture(page, fixtures.multi());
-  await page.getByRole('button', { name: 'Line', exact: true }).click();
+  await page.getByRole('button', { name: 'Lines', exact: true }).click();
   await expect(svg.locator('path[stroke]')).toHaveCount(3);
   await expect(svg.locator('[data-role="legend"]').getByText('Igaunija')).toBeVisible();
+
+  // First/last value labels in the line colour
+  await page.getByLabel('Value labels').selectOption('ends');
+  await expect(svg.locator('[data-role="value"]')).toHaveCount(6);
+});
+
+test('sort largest first and zoom to actual size', async ({ page }) => {
+  await createProject(page);
+  const svg = await uploadFixture(page, fixtures.single());
+  await page.getByRole('button', { name: 'Horizontal' }).click();
+  await page.getByLabel('Order').selectOption('desc');
+  const firstLabel = await svg.locator('text').first().textContent();
+  expect(firstLabel).toBe('2022'); // largest value first
+
+  await page.getByRole('group', { name: 'Zoom' }).getByRole('button', { name: '100%' }).click();
+  await expect(page.locator('figcaption')).toContainText('165 × 90 mm · 100%');
+  const box = await page.locator('[data-role="artboard"]').boundingBox();
+  expect(Math.round(box.width)).toBe(Math.round(165 * 96 / 25.4));
 });
 
 test('SVG export is mm-based, embeds Montserrat, has no px', async ({ page }) => {

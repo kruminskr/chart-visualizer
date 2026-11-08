@@ -13,12 +13,33 @@ const LABEL_GAP = 1.5; // baseline → category label (spec: 1.5mm)
  * Bar chart. config: orientation 'vertical'|'horizontal', stacked, valueLabels 'none'|'inside'|'outside',
  * barWidth 0.2–0.95 (share of the category slot), decimals (null = auto), yearFormat, seriesColors, unit.
  */
+/** Default bar thickness: designer files use ~0.6 (vertical), ~0.75 (horizontal), ~0.85 (grouped by country). */
+export function defaultBarWidth(config, data) {
+  if (config.orientation !== 'horizontal') return 0.6;
+  return data?.categories?.some(c => c.group) ? 0.85 : 0.75;
+}
+
+/** sort 'desc': largest first (within each group, groups keep their order). */
+export function sortData(data, sort) {
+  if (sort !== 'desc') return data;
+  const total = i => data.series.reduce((a, s) => a + (s.values[i] ?? 0), 0);
+  const groupRank = new Map();
+  data.categories.forEach(c => { if (!groupRank.has(c.group)) groupRank.set(c.group, groupRank.size); });
+  const order = data.categories.map((_, i) => i)
+    .sort((a, b) => groupRank.get(data.categories[a].group) - groupRank.get(data.categories[b].group) || total(b) - total(a));
+  return {
+    ...data,
+    categories: order.map(i => data.categories[i]),
+    series: data.series.map(s => ({ ...s, values: order.map(i => s.values[i]) })),
+  };
+}
+
 const BarChart = forwardRef(function BarChart({ data, config = {}, widthMm, heightMm }, ref) {
-  const { categories, series } = data;
+  const { categories, series } = sortData(data, config.sort);
   const horizontal = config.orientation === 'horizontal';
   const stacked = !!config.stacked && series.length > 1;
   const valueLabels = config.valueLabels ?? 'none';
-  const barWidth = config.barWidth ?? 0.6;
+  const barWidth = config.barWidth ?? defaultBarWidth(config, data);
   const names = series.map(s => s.name);
   const colors = seriesColors(names, config.seriesColors);
   const grouped = categories.some(c => c.group);
@@ -132,24 +153,30 @@ const BarChart = forwardRef(function BarChart({ data, config = {}, widthMm, heig
   const labelW = Math.max(...categories.map(c => Math.max(...c.label.split('\n').map(l => textWidth(l))))) + 2;
   const ML = groupW + labelW;
   const valueW = valueLabels === 'outside' || stacked ? textWidth(formatNumber(max, valueDecimals)) + 1.5 : 0;
-  const MT = top + 0.5;
+  const MT = top + (grouped ? STROKE : 0.5);
   const innerW = widthMm - ML - Math.max(valueW, 1);
-  const innerH = heightMm - MT - 0.5;
-  const yb = scaleBand().domain(cats).range([0, innerH]).paddingInner(1 - barWidth).paddingOuter((1 - barWidth) / 2);
+  const innerH = heightMm - MT - (grouped ? STROKE : 0.5);
+  // Row positions: one unit per category plus extra space between groups (designer 07: tight bars, wider group gaps).
+  const GROUP_GAP = grouped ? 0.8 : 0;
+  const groupIdx = [];
+  categories.forEach((c, i) => groupIdx.push(i === 0 ? 0 : groupIdx[i - 1] + (c.group !== categories[i - 1].group ? 1 : 0)));
+  const nGroups = (groupIdx.at(-1) ?? 0) + 1;
+  const unit = innerH / (categories.length + GROUP_GAP * (nGroups - 1));
+  const yb = Object.assign(ci => (Number(ci) + GROUP_GAP * groupIdx[ci]) * unit + (unit * (1 - barWidth)) / 2, { bandwidth: () => unit * barWidth });
   const xs = scaleLinear().domain([min, max]).range([0, innerW]);
   const inner = scaleBand().domain(series.map((_, i) => String(i))).range([0, yb.bandwidth()]).padding(0.04);
   // Group boundaries (first category index of each group after the first).
   const groupStarts = categories.map((c, i) => (i > 0 && c.group !== categories[i - 1].group ? i : null)).filter(i => i != null);
+  const ruleY = i => (Number(i) + GROUP_GAP * groupIdx[i]) * unit - (GROUP_GAP * unit) / 2;
 
   return (
     <svg ref={ref} width={`${widthMm}mm`} height={`${heightMm}mm`} viewBox={`0 0 ${widthMm} ${heightMm}`} xmlns="http://www.w3.org/2000/svg">
       <FontImport />
       {legend}
       <g transform={`translate(0,${rnd(MT)})`}>
-        {grouped && groupStarts.map(i => {
-          const gy = rnd((yb(String(i - 1)) + yb.bandwidth() + yb(String(i))) / 2);
-          return <line key={`gs${i}`} x1={0} x2={widthMm} y1={gy} y2={gy} stroke={GRID} strokeWidth={STROKE} />;
-        })}
+        {grouped && [0, ...groupStarts.map(ruleY), innerH].map(gy => (
+          <line key={`gs${gy}`} x1={0} x2={widthMm} y1={rnd(gy)} y2={rnd(gy)} stroke={GRID} strokeWidth={STROKE} />
+        ))}
         {grouped && categories.map((c, i) => (i === 0 || c.group !== categories[i - 1].group) && (
           <text key={`g${i}`} x={0} y={rnd(yb(String(i)) + yb.bandwidth() / 2)} dy="0.35em" {...FONT_PROPS} fill={countryColor(c.group) ?? FONT_PROPS.fill}>{c.group}</text>
         ))}
@@ -164,12 +191,12 @@ const BarChart = forwardRef(function BarChart({ data, config = {}, widthMm, heig
             const x0 = xs(Math.min(from, to)), x1 = xs(Math.max(from, to));
             const w = x1 - x0;
             const label = formatNumber(v, valueDecimals);
-            const fits = w >= textWidth(label) + 1.6 && bh >= FONT * 0.9;
+            const fits = w >= textWidth(label) + 1.6 && bh >= FONT * 0.72; // Montserrat cap height ≈ 0.7em
             let lbl = null;
             if (valueLabels === 'inside' && fits) {
               lbl = <text x={rnd(stacked ? x0 + w / 2 : x1 - 0.8)} y={rnd(by + bh / 2)} dy="0.35em" textAnchor={stacked ? 'middle' : 'end'} {...FONT_PROPS} fill="#FFFFFF">{label}</text>;
             } else if (valueLabels !== 'none' && !stacked) {
-              lbl = <text x={rnd(x1 + 0.8)} y={rnd(by + bh / 2)} dy="0.35em" {...FONT_PROPS}>{label}</text>;
+              lbl = <text x={rnd(x1 + 0.8)} y={rnd(by + bh / 2)} dy="0.35em" {...FONT_PROPS} fill={barColor(si, ci)}>{label}</text>;
             }
             return (
               <g key={`b${si}-${ci}`}>

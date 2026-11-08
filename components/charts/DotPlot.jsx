@@ -43,12 +43,13 @@ const DotPlot = forwardRef(function DotPlot({ data, config = {}, widthMm, height
   const tickDec = decimalsForStep(ticks[1] - ticks[0]);
 
   const rowLabelW = single ? 0 : Math.max(...rows.map(s => textWidth(s.name))) + 3;
-  const topLabels = single ? FONT + 2.5 : 0;
-  const MT = LEGEND_H + topLabels;
+  // Single strip (designer 25): country labels share the top row with the legend, the band fills the rest.
+  const MT = LEGEND_H;
   const MB = TICK + 1 + FONT * 1.2;
   const innerW = widthMm - rowLabelW - MR - DOT_R;
   const rowH = (heightMm - MT - MB) / rows.length;
-  const bandH = Math.min(rowH * (single ? 1 : 0.75), DOT_R * 2 + 2.6);
+  const bandH = single ? rowH : Math.min(rowH * 0.75, DOT_R * 2 + 2.6);
+  const dotR = Math.min(DOT_R, bandH * 0.36);
   const x = scaleLinear().domain(xTmp.domain()).range([DOT_R, innerW]);
 
   const order = categories.map((c, i) => i)
@@ -92,22 +93,22 @@ const DotPlot = forwardRef(function DotPlot({ data, config = {}, widthMm, height
                 if (v == null || label === reference) return null;
                 const hl = highlight.includes(label);
                 return (
-                  <circle key={ci} cx={rnd(x(v))} cy={rnd(cy)} r={DOT_R}
+                  <circle key={ci} cx={rnd(x(v))} cy={rnd(cy)} r={rnd(dotR)}
                     fill={hl ? colorOf(label) : OTHER_DOT}
                     {...(hl ? { stroke: '#FFFFFF', strokeWidth: 0.1 } : { style: { mixBlendMode: 'multiply' } })}
                     data-label={label} />
                 );
               })}
               {reference && s.values[categories.findIndex(c => c.label === reference)] != null && (
-                <rect x={rnd(x(s.values[categories.findIndex(c => c.label === reference)]) - 0.3)} y={rnd(cy - bandH / 2 - 0.6)}
-                  width={0.6} height={rnd(bandH + 1.2)} fill={BLACK} data-role="reference" />
+                <rect x={rnd(x(s.values[categories.findIndex(c => c.label === reference)]) - 0.3)} y={rnd(cy - bandH / 2 + (single ? 0 : -0.6))}
+                  width={0.6} height={rnd(bandH + (single ? 0 : 1.2))} fill={BLACK} data-role="reference" />
               )}
             </g>
           );
         })}
         {labelItems.map(l => (
           <g key={`l${l.name}`}>
-            <text x={rnd(l.lx)} y={rnd(MT - 1.2)} {...FONT_PROPS} fill={l.color}>{l.name}</text>
+            <text x={rnd(l.lx)} y={2.5} dy="0.35em" {...FONT_PROPS} fill={l.color}>{l.name}</text>
           </g>
         ))}
         {ticks.map(t => (
