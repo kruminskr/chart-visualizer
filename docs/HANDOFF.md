@@ -15,6 +15,7 @@ Branch `claude/dev-environment-setup-4an2ao` (pushed; CI green; **not merged to 
 4. Merge the branch to `main` when the user wants it live (Vercel deploys main; branches get preview URLs). No DB migration is needed: the schema is unchanged and config lives in `configJson`.
 
 ## Open questions
+- Seen in the 2026-11-08 screen tour (not fixed): (a) a single-sheet upload *replaces the open chart's data* instead of adding a chart, which may surprise users; (b) multi-line "All points" value labels overlap where lines are close; (c) a header cell that is only a year ("Valsts | 2023") with one data column is read as a data row.
 - Current hosting has two problems (2026-11-08, see research doc §2.2): Vercel Hobby is non-commercial only, and Supabase Free pauses after ~7 idle days. Supabase Storage holds uploads that nothing reads.
 - All LaSER questions: `docs/laser-questions.md` (colours, CMYK, header block, "0" vs "0,0", group order, rating bands, missing 9. attēls data, UI language).
 - **LaSER's reference files (workbook, 9 designer SVGs, PDF spec) are not in git** (`Examples/*.xlsx|svg|pdf` are gitignored on purpose). To re-run the SVG comparison, the user must upload them again or decide to commit them. (2026-11-08)
