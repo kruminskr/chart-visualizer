@@ -46,3 +46,38 @@ Paldies!
 8. Dot plot with several rows: are rating bands needed? Callouts stay with the designer?
 9. Data for the 9. attēls charts (to compare those too).
 10. Should the UI be in Latvian?
+
+---
+
+# 2. kārta: darba plūsma un saskarne (melnraksts, 2026-11-08)
+
+Status: **draft**. Send it together with the screenshots of the new version (`docs/img/v3-*.png`) and the mockups (`docs/img/mock-*.png`). The English summary is below.
+
+Labdien!
+
+Esam uzlabojuši programmu: tagad var uzreiz ievilkt Excel failu sākumlapā, sarakstā redzami visu grafiku sīktēli, un skaitļus var izlabot tieši programmā. Lai saprastu, kā to padarīt pēc iespējas vienkāršāku pētniekiem, būtu daži jautājumi:
+
+**1. Cik grafiku vienā reizē?** Cik lapu (grafiku) parasti ir vienā Excel failā? Vai viens fails ir viens pētījums, vai katram grafikam savs fails?
+
+**2. Skaitļu labošana.** Ja kāds skaitlis mainās, vai ērtāk to izlabot Excelī un augšupielādēt failu vēlreiz, vai izlabot tieši programmā (tagad var abējādi)? Ja augšupielādē no jauna, vai vajag saglabāt jau veiktos iestatījumus (piemēram, horizontāls, kārtots, stabiņu platums)?
+
+**3. Veco grafiku atvēršana.** Vai pie grafikiem atgriežaties vēlāk (piemēram, pēc gada ar jauniem datiem), vai pietiek, ja pieejami tikai pašreizējā pētījuma grafiki?
+
+**4. Kopīga vai personīga vieta.** Vai visiem LaSER pētniekiem jāredz visi projekti (kopīga vieta), vai katram savi? Kā ar ārējiem pētniekiem, kas strādā tikai pie viena pētījuma? Vai viņiem jāredz tikai savs projekts?
+
+**5. Kādus iestatījumus tiešām maināt?** Kas jums parasti jāpielāgo grafikā (veids, horizontāls/vertikāls, kārtība, skaitļi uz stabiņiem, izmērs, stabiņu platums, krāsas…)? Ko nekad neaiztiekat? Mēs gribētu pārējo paslēpt zem "Vairāk iestatījumu", lai saskarne paliek vienkārša.
+
+**6. Krāsas.** Vai krāsām jābūt fiksētām pēc valstīm (pētnieks tās nevar mainīt), vai jāatstāj iespēja izvēlēties no LaSER paletes?
+
+**7. Darba plūsma.** Pielikumā divas skices: (a) visu grafiku pārskats ar brīdinājumiem un pogu "Lejupielādēt visus", (b) vienkāršots redaktors ar 4 galvenajiem iestatījumiem. Kas no tā jums šķiet noderīgs?
+
+Paldies!
+
+## English summary (round 2)
+1. How many charts per Excel file? One file = one paper, or one file per chart?
+2. Fixing numbers: in Excel and re-upload, or in the tool? On re-upload, keep their settings?
+3. Do they reopen old charts (e.g. a year later), or only the current paper's?
+4. Shared team space or personal? Should external researchers see only their own project?
+5. Which settings do they actually change, and which never? (Decides what goes behind "More options".)
+6. Colours locked to the country palette, or a choice from the LaSER palette?
+7. Feedback on the two mockups (set overview, simplified editor).

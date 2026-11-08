@@ -205,3 +205,36 @@ The user answers what they can. The rest goes to LaSER (translate into `docs/las
 13. Is there real data in the production Supabase now, or only tests? (Decides whether we migrate data.)
 14. Do you (or LaSER) have a domain we can send login emails from and point the site at? (Decides code-by-email vs. passwords, and C's address.)
 15. Does LaSER have any rule that data must stay with EU companies? (The only strong reason to choose C over B.)
+
+### Answers (user, 2026-11-08)
+1. **Users = researchers.** They make the charts themselves to see how they'll look, then hand them to the designer, who lays out the paper (published as a PDF and in print, e.g. [Rīgas zināšanu josla 2.0](https://domnicalaser.lv/rigas-zinasanu-judze-2-0/)). 3 researchers at LaSER, sometimes external researchers for a single paper: ~5 users, 10 at most. Goal: every researcher produces charts in one standard.
+2. Bursts around each report, a few times a month. (Why it matters: people forget a tool between uses, so it must explain itself every time; and a free database that pauses after a quiet week hits exactly this pattern.)
+3. They can follow simple Excel templates, but the tool shouldn't depend on exact cells. The current parser already finds the table anywhere on the sheet.
+4. Unknown; assume ~5 charts per upload. → ask LaSER.
+5. Editing values after upload is valuable. → **built** (Data panel). Also ask LaSER how they prefer to fix numbers.
+6. Excel only for now. No paste-a-table.
+7. SVG goes only to the designer. No other exports for now.
+8. Designer: 77,5 / 165 mm is her own "keeping order" choice. Ideally width and height are free. (Already possible: presets + free mm inputs.)
+9. Researchers should reach the projects they're working on, at least current charts. → ask LaSER about older ones.
+10. → ask LaSER.
+11. Most important question. Build what we think is needed, then talk it through with LaSER.
+12. → ask LaSER.
+13. No production data to keep.
+14. LaSER owns a domain. (Only needed for login-code emails or a nicer address. Not needed with passwords.)
+15. Probably no EU-only rule. The user likes C for its simplicity and price. **Hosting changes are on hold.**
+
+### Built this round (UX quick wins that don't wait on LaSER)
+- **Start from the file:** the dashboard is now a drop zone ("Make charts from an Excel file"). Choosing a file creates a project named after it and opens the sheet picker directly. "+ Empty project" stays as a small link. Uploading into an "Untitled Project" also renames it after the file.
+- **Edit values in place:** every number in the Data panel is an input (Latvian decimal comma, empty = no value, unreadable input is rejected). The Excel file isn't changed.
+- **See the whole set:** the chart list shows a live thumbnail of each chart and a ⚠ count when the parser left notes.
+
+## Part 5 — Flow ideas to show LaSER
+Three directions, from least to most change. They aren't exclusive.
+
+| | Idea | What changes | Mockup |
+|---|---|---|---|
+| F1 | **Current editor, tidied** (built) | Drop-to-start, thumbnails, editable data. Everything else as now. | `img/v3-dashboard.png`, `img/v3-editor.png`, `img/v3-data-edit.png` |
+| F2 | **Set overview first** | After upload, a grid of all charts with warnings and a "Download all" button. Click a chart to edit it. Good if a paper has many charts. | `img/mock-review.png` |
+| F3 | **Simple editor** | The settings panel shows ~4 common controls. Everything else sits behind "More options". The right set depends on LaSER's answer to "which adjustments do you make". | `img/mock-edit.png` |
+
+Not proposed now: a step-by-step wizard. With ~5 charts and repeat users, it adds clicks without adding clarity.

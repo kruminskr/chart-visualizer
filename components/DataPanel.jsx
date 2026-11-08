@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { formatNumber } from '@/utils/format';
+import { toNumber } from '@/utils/excelParser';
 
 /**
  * What the parser read, under the canvas: warnings, notes, and the table itself.
  * Untick a row or series to leave it out of the chart (e.g. a "Kopā" total row).
+ * Values can be corrected in place; an empty cell means "no value".
  */
-export default function DataPanel({ data, exclude = {}, onExclude, onSwap }) {
+export default function DataPanel({ data, exclude = {}, onExclude, onSwap, onEditValue }) {
   const [open, setOpen] = useState(false);
   const rows = new Set(exclude.rows ?? []);
   const cols = new Set(exclude.series ?? []);
@@ -52,6 +54,7 @@ export default function DataPanel({ data, exclude = {}, onExclude, onSwap }) {
               {data.notes?.map(n => <li key={n}>Note below the table: <span className="text-gray-800">{n}</span></li>)}
             </ul>
           )}
+          <p className="text-xs text-gray-400 mb-1.5">Click a number to correct it (the Excel file is not changed). Untick a row or series to leave it out.</p>
           <table className="text-xs border-collapse">
             <thead>
               <tr className="text-left text-gray-500">
@@ -77,8 +80,9 @@ export default function DataPanel({ data, exclude = {}, onExclude, onSwap }) {
                   </td>
                   <td className="pr-4 py-1 whitespace-pre">{c.group ? <span className="text-gray-400">{c.group} / </span> : null}{c.label}</td>
                   {data.series.map((s, j) => (
-                    <td key={j} className={`pr-4 py-1 text-right tabular-nums ${cols.has(j) ? 'text-gray-300' : ''}`}>
-                      {s.values[i] == null ? <span className="text-gray-300">—</span> : formatNumber(s.values[i], decimals)}
+                    <td key={j} className="pr-2 py-0.5">
+                      <ValueCell value={s.values[i]} decimals={decimals} muted={cols.has(j) || rows.has(i)}
+                        label={`${s.name || `Series ${j + 1}`}, ${c.label}`} onCommit={v => onEditValue(j, i, v)} />
                     </td>
                   ))}
                 </tr>
@@ -88,5 +92,24 @@ export default function DataPanel({ data, exclude = {}, onExclude, onSwap }) {
         </div>
       )}
     </section>
+  );
+}
+
+/** One editable number. Commits on blur or Enter; Escape or unreadable input restores the old value. */
+function ValueCell({ value, decimals, muted, label, onCommit }) {
+  const shown = value == null ? '' : formatNumber(value, decimals);
+  const reset = e => { e.target.value = shown; };
+  const commit = e => {
+    const text = e.target.value.trim();
+    if (text === shown) return;
+    const next = text === '' ? null : toNumber(text);
+    if (text !== '' && next == null) return reset(e);
+    onCommit(next);
+  };
+  return (
+    <input key={shown} defaultValue={shown} aria-label={label} placeholder="—" inputMode="decimal"
+      onBlur={commit}
+      onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') { reset(e); e.target.blur(); } }}
+      className={`w-20 rounded px-1.5 py-0.5 text-right tabular-nums bg-transparent border border-transparent hover:border-gray-200 focus:border-gray-400 focus:bg-white focus:outline-none placeholder:text-gray-300 ${muted ? 'text-gray-300' : ''}`} />
   );
 }

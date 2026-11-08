@@ -11,7 +11,20 @@ const fills = loc => loc.evaluateAll(els => els.map(e => e.getAttribute('fill'))
 test('dashboard loads for the dev user', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Make charts from an Excel file' })).toBeVisible();
+});
+
+test('dashboard: choosing a file opens a project named after it, straight into the sheet picker', async ({ page }) => {
+  await page.goto('/dashboard');
+  await page.getByLabel('Excel file').setInputFiles({ ...fixtures.workbook(), name: 'Petijums_2026.xlsx' });
+  await page.waitForURL(/\/project\/[\w-]+$/);
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: /Create \d+ charts/ }).click();
+  await expect(page.locator('[data-role="artboard"] svg')).toBeVisible();
+  await expect(page.getByRole('banner').getByText('Petijums 2026')).toBeVisible();
+  // The chart list shows a live thumbnail per chart
+  await expect(page.getByRole('navigation', { name: 'Charts' }).locator('svg[viewBox]').first()).toBeVisible();
 });
 
 test('upload → bar chart renders to spec', async ({ page }) => {
@@ -161,7 +174,7 @@ test('Latvian CSV → data panel: unit, exclude a row, swap rows/columns', async
   const panel = page.getByRole('region', { name: 'Data' });
   await panel.getByRole('button', { name: /Data/ }).click();
   await expect(panel.getByText('Avots: Eurostat')).toBeVisible();
-  await expect(panel.getByText('4,25')).toBeVisible(); // decimal comma read correctly
+  await expect(panel.getByLabel('Igaunija, 2021')).toHaveValue('4,25'); // decimal comma read correctly
   await expect(panel.getByRole('row')).toHaveCount(5); // header + 4 rows (gap row kept)
 
   // Leave out the total row
@@ -173,4 +186,25 @@ test('Latvian CSV → data panel: unit, exclude a row, swap rows/columns', async
   // Swap: countries become categories
   await panel.getByRole('button', { name: 'Swap rows / columns' }).click();
   await expect(svg.locator('[data-role="legend"]').getByText('2019')).toBeVisible();
+});
+
+test('data panel: correct a value in place, bad input is rejected', async ({ page }) => {
+  await createProject(page);
+  const svg = await uploadFixture(page, fixtures.single());
+  const panel = page.getByRole('region', { name: 'Data' });
+  await panel.getByRole('button', { name: /Data/ }).click();
+
+  const cell = panel.getByRole('textbox').first();
+  const bar = svg.locator('g[transform] rect').first();
+  const before = Number(await bar.getAttribute('height'));
+
+  await cell.fill('abc');
+  await cell.press('Enter');
+  await expect(cell).not.toHaveValue('abc'); // reverted
+  expect(Number(await bar.getAttribute('height'))).toBe(before);
+
+  await cell.fill('1,5');
+  await cell.press('Enter');
+  await expect(cell).toHaveValue('1,5');
+  await expect.poll(async () => Number(await bar.getAttribute('height'))).toBeLessThan(before);
 });

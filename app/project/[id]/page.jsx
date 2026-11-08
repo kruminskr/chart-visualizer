@@ -10,6 +10,7 @@ import Header from '@/components/Header';
 import { parseFile, normalizeData, isAcceptedFile, transposeData, applyExclusions } from '@/utils/excelParser';
 import DataPanel from '@/components/DataPanel';
 import { exportSVG } from '@/utils/svgExporter';
+import { takePendingFile } from '@/utils/pendingFile';
 
 const num = (v, d) => parseFloat(v) || d;
 
@@ -143,6 +144,7 @@ export default function ProjectPage() {
       return;
     }
     setError(null);
+    if (project?.title === 'Untitled Project') handleProjectRename(file.name.replace(/\.[^.]+$/, '').replace(/_+/g, ' ').trim());
     if (usable.length === 1) await applySheets(file, usable);
     else setPicker({ file, sheets: result.sheets });
   }
@@ -187,6 +189,12 @@ export default function ProjectPage() {
       method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: newTitle }),
     });
   }
+
+  // A file dropped on the dashboard opens as soon as its new (empty) project has loaded.
+  useEffect(() => {
+    const file = loaded && takePendingFile();
+    if (file) Promise.resolve(file).then(handleFile);
+  }, [loaded]); // eslint-disable-line react-hooks/exhaustive-deps -- once per load; takePendingFile() empties the slot
 
   const widthMm = num(active?.widthMm, 165);
   const heightMm = num(active?.heightMm, 90);
@@ -244,6 +252,7 @@ export default function ProjectPage() {
 
           {hasData && (
             <DataPanel data={active.data} exclude={active.config?.exclude}
+              onEditValue={(j, i, v) => updateActive({ data: { ...active.data, series: active.data.series.map((s, k) => (k === j ? { ...s, values: s.values.map((x, n) => (n === i ? v : x)) } : s)) } })}
               onExclude={exclude => updateActive({ config: { ...active.config, exclude } })}
               onSwap={() => updateActive({ data: transposeData(active.data), config: { ...active.config, exclude: undefined, highlight: undefined, reference: undefined } })} />
           )}

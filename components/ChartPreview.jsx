@@ -6,7 +6,7 @@ import LineChart from '@/components/charts/LineChart';
 import DotPlot from '@/components/charts/DotPlot';
 
 const MM_TO_PX = 96 / 25.4; // CSS px per mm: zoom 1 = the chart's real printed size on a 96dpi screen
-const RENDERERS = { bar: BarChart, line: LineChart, dot: DotPlot };
+export const RENDERERS = { bar: BarChart, line: LineChart, dot: DotPlot };
 const PAD = 48;
 
 /**

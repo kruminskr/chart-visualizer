@@ -8,7 +8,7 @@ Branch `claude/dev-environment-setup-4an2ao` (pushed; CI green; **not merged to 
 - **Verified against the designer's SVGs** (`docs/svg-comparison.md`): sizes, colours, strokes and fonts match.
 
 ## Next steps
-0. **Waiting on answers to the UX questions and hosting choice in `docs/research-ux-hosting.md` Part 4** (round 1). The hosting plan: remove Supabase (Better Auth + no file storage, §3.1), then deploy on B = Vercel Hobby + Neon (§3.5). LaSER-bound questions still need translating into `docs/laser-questions.md`.
+0. **UX round 2:** the user sends LaSER `docs/laser-questions.md` "2. kārta" with `docs/img/v3-*.png` and the mockups. Then build F2/F3 from `docs/research-ux-hosting.md` Part 5 based on their answers. **Hosting is on hold** (user leans to C; plan in Part 3).
 1. Send `docs/laser-questions.md` (Latvian, ready). Record the answers there and update `docs/plan-v2.md`.
 2. Work that needs no LaSER input: a paste-a-table input (same parser); Excel templates per chart type; export all charts as a zip; duplicate a chart; wrapping long category labels and long legends; negative values in stacked/horizontal bars; undo.
 3. After LaSER answers: lock the country colours, an optional header block (figure no., title, source, note), CMYK/PDF if needed, dot-plot rating bands, group order, Latvian UI.
@@ -21,6 +21,7 @@ Branch `claude/dev-environment-setup-4an2ao` (pushed; CI green; **not merged to 
 - Should CI keep running e2e on every push? It takes about 1,5 min and is currently fine. (2026-11-08)
 
 ## Recent sessions
+- 2026-11-08: UX round 1: dashboard drop-to-start, chart thumbnails + warning counts, editable Data panel values; LaSER questions round 2 drafted; B vs C hosting breakdown.
 - 2026-11-08: Research only: UX deep dive (Datawrapper/Flourish/think-cell patterns, concept mockups in `docs/img/`) and hosting/auth/DB options → `docs/research-ux-hosting.md`.
 - 2026-11-08: Parser v3 + data panel; three-pane editor; SVG comparison vs designer files + fixes; LaSER questions file.
 - 2026-11-08: Built v2 chart types (bar/line/dot, one chart per sheet); planned v2 from LaSER feedback.

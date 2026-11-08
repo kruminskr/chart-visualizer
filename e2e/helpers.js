@@ -12,7 +12,7 @@ export const fixtures = {
 /** Creates a fresh project from the dashboard and lands on its editor page. */
 export async function createProject(page) {
   await page.goto('/dashboard');
-  await page.getByRole('button', { name: '+ New Project' }).click();
+  await page.getByRole('button', { name: '+ Empty project' }).click();
   await page.waitForURL(/\/project\/[\w-]+$/);
   await expect(page.getByText('Upload an Excel file to get started')).toBeVisible();
 }

@@ -2,9 +2,21 @@
 
 import { useRef } from 'react';
 import { ChartIcon } from '@/components/ChartIcons';
-import { ACCEPTED_FILES } from '@/utils/excelParser';
+import { ACCEPTED_FILES, applyExclusions } from '@/utils/excelParser';
+import { RENDERERS } from '@/components/ChartPreview';
 
 const fmtMm = v => String(parseFloat(v) || '').replace('.', ',');
+
+/** The chart itself, scaled to the rail's width, so the whole set can be checked at a glance. */
+function Thumb({ chart }) {
+  const Chart = RENDERERS[chart.type] ?? RENDERERS.bar;
+  const w = parseFloat(chart.widthMm) || 165, h = parseFloat(chart.heightMm) || 90;
+  return (
+    <span aria-hidden="true" className="block bg-white ring-1 ring-gray-200 rounded-sm p-1 [&_svg]:w-full [&_svg]:h-auto [&_svg]:block pointer-events-none">
+      <Chart data={applyExclusions(chart.data, chart.config?.exclude)} config={{ ...chart.config, unit: chart.unit }} widthMm={w} heightMm={h} />
+    </span>
+  );
+}
 
 /** Left rail: every chart in the project, plus "Add from Excel". */
 export default function ChartList({ charts, activeId, onSelect, onDelete, onFile, disabled }) {
@@ -20,14 +32,18 @@ export default function ChartList({ charts, activeId, onSelect, onDelete, onFile
         {charts.map((c, i) => {
           const active = c.id === activeId;
           const name = c.title || `Chart ${i + 1}`;
+          const hasData = c.data?.series?.length > 0;
+          const notes = c.data?.warnings?.length ?? 0;
           return (
             <li key={c.id} className="group relative px-2">
               <button
                 type="button"
                 onClick={() => onSelect(c.id)}
                 aria-current={active ? 'true' : undefined}
-                className={`w-full text-left flex gap-2.5 rounded-md px-2.5 py-2 pr-8 transition-colors ${active ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-50'}`}
+                className={`w-full text-left flex flex-col gap-1.5 rounded-md px-2.5 py-2.5 transition-colors ${active ? 'bg-gray-100 text-gray-900 ring-1 ring-gray-300' : 'text-gray-600 hover:bg-gray-50'}`}
               >
+                {hasData && <Thumb chart={c} />}
+                <span className="flex gap-2 min-w-0 pr-6">
                 <span className={`mt-0.5 shrink-0 ${active ? 'text-[#E6007E]' : 'text-gray-400'}`}>
                   <ChartIcon type={c.type} horizontal={c.config?.orientation === 'horizontal'} />
                 </span>
@@ -36,13 +52,19 @@ export default function ChartList({ charts, activeId, onSelect, onDelete, onFile
                   <span className="block text-[11px] text-gray-400 mt-0.5">
                     {c.config?.sheetName ? `Sheet ${c.config.sheetName} · ` : ''}{fmtMm(c.widthMm)} × {fmtMm(c.heightMm)} mm
                   </span>
+                  {notes > 0 && (
+                    <span className="block text-[11px] text-amber-700 mt-0.5">
+                      ⚠ {notes === 1 ? '1 note' : `${notes} notes`} on the data
+                    </span>
+                  )}
+                </span>
                 </span>
               </button>
               <button
                 type="button"
                 onClick={() => onDelete(c.id)}
                 aria-label={`Delete ${name}`}
-                className="absolute right-3 top-2 p-1 rounded text-gray-300 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-red-600 hover:bg-red-50"
+                className="absolute right-3 bottom-2 p-1 rounded text-gray-300 opacity-0 group-hover:opacity-100 focus:opacity-100 hover:text-red-600 hover:bg-red-50"
               >
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><path d="M3 4.5h10M6.5 4.5V3h3v1.5M5 4.5l.5 8.5h5l.5-8.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </button>
