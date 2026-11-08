@@ -238,3 +238,68 @@ Three directions, from least to most change. They aren't exclusive.
 | F3 | **Simple editor** | The settings panel shows ~4 common controls. Everything else sits behind "More options". The right set depends on LaSER's answer to "which adjustments do you make". | `img/mock-edit.png` |
 
 Not proposed now: a step-by-step wizard. With ~5 charts and repeat users, it adds clicks without adding clarity.
+
+## Part 6 — Hosting deep dive (2026-11-08, round 2)
+The user leans to C (simple, cheap). Hosting changes are still **on hold** until the user picks. Same needs as before: ≤10 users, a few MB of chart JSON, no file storage, bursty use, non-commercial.
+
+### 6.1 Four concrete setups
+| | **B: Vercel + Neon** | **C1: VPS + Coolify** | **C2: VPS + Docker Compose + Caddy** | C3: VPS + Kamal |
+|---|---|---|---|---|
+| What it is | Two managed free tiers | A self-hosted "Vercel" dashboard on your server | 3 containers (app, Postgres, Caddy for HTTPS), config files in the repo, deploys from GitHub Actions | A deploy CLI (from Basecamp) that pushes containers over SSH |
+| Monthly cost | €0 | ≈ €8–9 (CX23 + backups + VAT) | same box, ≈ €8–9 | same box |
+| Admin UI | Vercel/Neon dashboards | yes (web panel) | none (SSH + `docker compose logs`) | none |
+| RAM overhead | — | 0,5–1,2 GB idle for the panel | ~0 (Caddy is tiny) | ~0 |
+| Builds run on | Vercel | **the server** (tight on 4 GB) | **GitHub Actions** (server only pulls the image) | your machine/CI |
+| Branch preview URLs | yes | possible, needs setup | no (could add a staging copy) | no |
+| Security surface | providers' problem | **an internet-facing admin panel**: Coolify disclosed 11 critical flaws in Jan 2026 (auth bypass, RCE) and more criticals through spring. Patched, but you must update promptly ([THN](https://thehackernews.com/2026/01/coolify-discloses-11-critical-flaws.html), [Hostzero](https://hostzero.com/articles/is-coolify-safe-2026-cves)) | SSH (key-only) + ports 80/443 only | same as C2 |
+| Your upkeep | none | panel + OS updates, backups | OS auto-updates, check backups | same as C2 |
+
+Sources: [self-hosted PaaS comparison 2026](https://wz-it.com/en/blog/self-hosted-paas-comparison-coolify-dokploy-caprover/), [Coolify vs Dokploy vs Kamal](https://bitdoze.com/coolify-vs-dokploy-vs-kamal-2/), [Coolify vs Dokploy](https://getdeploying.com/guides/coolify-vs-dokploy). Dokploy is a lighter Coolify alternative (0,3–0,4 GB idle) with the same "panel on the internet" trade-off.
+
+**If C, then C2.** For one small app, a panel adds RAM, a build on a small box, and an attack surface that had a bad 2026, all to save writing about 5 small config files, which I can write. C2 is also the most standard setup: any developer understands it.
+
+### 6.2 What C2 consists of
+In the repo (I write these):
+- `Dockerfile`: Next.js `output: 'standalone'` image (copies `public/` and `.next/static` explicitly).
+- `compose.yml`: `app` (the image), `db` (Postgres 16 + a named volume + healthcheck), `caddy` (automatic Let's Encrypt HTTPS).
+- `Caddyfile`: about 3 lines, `charts.example.lv { reverse_proxy app:3000 }`.
+- `.github/workflows/deploy.yml`: on push to `main`, build the image, push it to GitHub's registry, SSH to the server, `docker compose pull && docker compose up -d`, then `prisma migrate deploy`.
+- `.github/workflows/backup.yml`: nightly SSH, `pg_dump`, stored as a workflow artifact (90 days), free. The same Action works for B (against Neon).
+
+One-time, by you (≈30 min, a step-by-step runbook will be in the repo):
+1. Hetzner account, create a CX23 (Ubuntu 24.04, Falkenstein/Nuremberg/Helsinki) with your SSH key, enable backups.
+2. A DNS record: `charts.<domain>` → server IP.
+3. On the server: install Docker, turn on unattended-upgrades, firewall 22/80/443. Copy-paste from the runbook.
+4. Add 3 GitHub secrets (server IP, SSH key, DB password).
+
+From then on: merge to `main` = deploy. These cloud sessions likely can't SSH to the server (the network allows HTTPS only), so I work through the repo and Actions. Server-side debugging is you over SSH, or me reading Action logs.
+
+### 6.3 VPS providers (EU)
+| Provider | Entry plan for this | Notes |
+|---|---|---|
+| **Hetzner** (DE/FI) | CX23 2 vCPU / 4 GB ≈ €5,49 + IPv4 + VAT; backups +20 % | Best-known, hourly billing, good panel/API. Prices rose in 2026, and the cheap plans were sometimes out of stock in Sep–Oct ([Northflank](https://northflank.com/blog/hetzner-cloud-server-price-increases), [Bitdoze](https://www.bitdoze.com/md/es/hetzner-cloud-precios-2026.md)) |
+| Netcup (DE) | from ≈ €3 | Cheapest, but the best prices need a 12–24-month term; no hourly billing ([Sliplane](https://sliplane.io/blog/top-5-cheap-vps-providers)) |
+| Contabo (DE) | ≈ €5 | Lots of RAM per euro; performance can vary at peak times |
+| OVHcloud (FR) | ≈ $4 for 2 GB | Big EU provider; 2 GB is tight but enough for C2 (no panel, no on-box builds) |
+
+Pick: **Hetzner CX23.** Fallback if out of stock: CAX11 (ARM, same RAM; the Docker image would be built for arm64).
+
+### 6.4 Pieces shared by B and C (unchanged from Part 3.1)
+Remove Supabase: Better Auth for login, delete the unused file storage, drop the two Supabase packages. Login options:
+- **Passwords that you create** (no email service; sign-up off). Simplest.
+- **Email one-time code:** needs an email sender (Resend free tier) and DNS records on a domain you control. For LaSER's domain, their IT adds the records.
+
+### 6.5 Domain
+- B: works without one (`*.vercel.app`). C: Caddy needs a domain name for HTTPS. Options: a subdomain of LaSER's domain (`grafiki.laser.lv`-style; LaSER's IT adds one DNS record), or your own domain (~€10/year).
+- Email codes would also need DNS records on that domain. Passwords don't.
+
+### 6.6 Effort and order
+1. Remove Supabase (auth + storage): about one session, testable locally. Needed for B and C.
+2. B: ~1 hour of settings. C2: ~half a session of config + your ~30 min on Hetzner and DNS.
+3. Moving B ↔ C2 later: a `pg_dump`/restore and changing a few settings (an afternoon).
+
+### 6.7 Decisions for the user
+1. B (free, no upkeep, preview URLs) or C2 (≈ €8–9/month, EU, you own the server)?
+2. Login: passwords you create (recommended) or email codes?
+3. Domain (C2 only): a LaSER subdomain or your own?
+4. Who opens the Hetzner account (it needs a payment method)?
