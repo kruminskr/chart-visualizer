@@ -1,6 +1,6 @@
 # LaSER Charts v2 — plan
 
-Status: **draft for decisions** (2026-11-08). No code written yet. Sections marked ❓ need an answer before or during implementation (see "Decisions" at the end).
+Status: P0–P3 **implemented** (2026-11-08). P4 open. Designer answered D1 (keep editable text, no outlines) and D3 (year format is a user toggle). Sections marked ❓ need an answer before or during implementation (see "Decisions" at the end).
 
 ## 1. What LaSER asked for
 

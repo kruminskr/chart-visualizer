@@ -40,3 +40,21 @@ export async function PUT(request, { params }) {
 
   return NextResponse.json(updated);
 }
+
+export async function DELETE(request, { params }) {
+  const user = await getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const { id: projectId, chartId } = await params;
+  const chart = await prisma.chart.findFirst({
+    where: {
+      id: chartId,
+      projectId,
+      project: { OR: [{ ownerId: user.id }, { collaborators: { some: { userId: user.id } } }] },
+    },
+  });
+  if (!chart) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+
+  await prisma.chart.delete({ where: { id: chartId } });
+  return NextResponse.json({ ok: true });
+}

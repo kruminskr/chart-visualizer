@@ -11,7 +11,7 @@ async function getAuthorizedProject(userId, projectId) {
         { collaborators: { some: { userId } } },
       ],
     },
-    include: { charts: true },
+    include: { charts: { orderBy: { createdAt: 'asc' } } },
   });
 }
 
