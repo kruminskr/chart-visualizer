@@ -17,9 +17,9 @@ dist-ssr/
 # Prisma generated client (regenerated via postinstall)
 node_modules/.prisma/
 
-# Claude Code internal data
-.claude/
-.cluadeignore
+# Claude Code — commit shared config, ignore personal/local files
+.claude/settings.local.json
+.claude/worktrees/
 
 # Binary/data files in Examples
 Examples/*.xlsx
@@ -46,3 +46,11 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Local dev / testing artifacts
+.dev-uploads/
+screenshots/
+playwright-report/
+test-results/
+.dev-server.log
+.dev-server.pid
