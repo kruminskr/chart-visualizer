@@ -1,35 +1,31 @@
-# Handoff — 2026-11-08
+# Handoff — 2026-11-08 (end of session)
 
 ## Where we are
-v2 P0–P3 are implemented on `claude/dev-environment-setup-4an2ao`:
-- Workbook upload → sheet picker → one chart per sheet, with chart tabs per project.
-- Latvian number format and the country palette.
-- Bars: vertical/horizontal, grouped/stacked, groups from merged cells, value labels, bar width.
-- Lines: multi-series, markers, area fill, label thinning.
-- Dot plot: highlight, EU reference.
-- Year format toggle.
-Not done: P4 (header block with figure number, title and source; PDF/CMYK), dot-plot rating bands, Latvian UI.
+Branch `claude/dev-environment-setup-4an2ao` (pushed; CI green; **not merged to main**, so not live on Vercel production). The app is a working v2:
+- **Input:** upload .xlsx/.xls/.ods/.csv → the parser (`utils/excelParser.js`) finds the table on each sheet → sheet picker → one chart per sheet. It handles titles and units, gaps, 1–2 header rows, years across columns (auto-swap), %, dates, hidden rows, and Latvian CSV encodings. Everything it skips becomes a warning.
+- **Editor:** three panes. Left: chart list. Centre: artboard canvas with Fit/100%/200% zoom, Export SVG, and a data panel (warnings, untick rows/series, swap rows/columns). Right: inspector.
+- **Charts:** bars (vertical/horizontal, grouped/stacked, groups from merged cells, sort, bar width, value labels), lines (multi, markers, area fill, first/last value labels, label thinning), dot plot (highlight, EU reference, single- and multi-strip). Latvian number format, country palette, year format toggle.
+- **Verified against the designer's SVGs** (`docs/svg-comparison.md`): sizes, colours, strokes and fonts match.
 
 ## Next steps
-1. Send `docs/laser-questions.md` (Latvian, ready) and record the answers there. Colours, CMYK, header block and zero format depend on them.
-2. P4 export fidelity: optional header block (figure no., title, source, note) in the SVG; CMYK/PDF only if LaSER needs it.
-3. Dot plot with several rows: rating bands (if LaSER confirms). Also group-order control for grouped bars.
-4. Latvian UI (question 10).
-5. Re-run the SVG comparison when new designer files arrive (method in `docs/svg-comparison.md`; LaSER's files are not in git).
+1. Send `docs/laser-questions.md` (Latvian, ready). Record the answers there and update `docs/plan-v2.md`.
+2. Work that needs no LaSER input: a paste-a-table input (same parser); Excel templates per chart type; export all charts as a zip; duplicate a chart; wrapping long category labels and long legends; negative values in stacked/horizontal bars; undo.
+3. After LaSER answers: lock the country colours, an optional header block (figure no., title, source, note), CMYK/PDF if needed, dot-plot rating bands, group order, Latvian UI.
+4. Merge the branch to `main` when the user wants it live (Vercel deploys main; branches get preview URLs). No DB migration is needed: the schema is unchanged and config lives in `configJson`.
 
-## Open questions (need the user / unverified)
-- The palette is country-based, per the designer SVGs (LV #E6007E, EE #F29FC5 or #F088B6?, LT #575756). Waiting for LaSER to confirm. (2026-11-08)
-- The mobile editor layout is dropped: the user prompts from a phone, but the tool is used on a PC. (2026-11-08)
-- Should CI also run e2e on every push, or only lint and unit tests? It currently runs all of them. (2026-11-08)
+## Open questions
+- All LaSER questions: `docs/laser-questions.md` (colours, CMYK, header block, "0" vs "0,0", group order, rating bands, missing 9. attēls data, UI language).
+- **LaSER's reference files (workbook, 9 designer SVGs, PDF spec) are not in git** (`Examples/*.xlsx|svg|pdf` are gitignored on purpose). To re-run the SVG comparison, the user must upload them again or decide to commit them. (2026-11-08)
+- Should CI keep running e2e on every push? It takes about 1,5 min and is currently fine. (2026-11-08)
 
 ## Recent sessions
-- 2026-11-08: Parser v3 (finds the table anywhere, gaps, 2 header rows, units, swapped years, %, dates, hidden rows, xls/ods/csv incl. Latvian encodings) + data panel (warnings, exclude rows/series, swap).
-- 2026-11-08: Three-pane editor (chart list / canvas with zoom / inspector), SVG comparison vs designer files + fixes, LaSER questions file.
-- 2026-11-08: Built v2 P0–P3 (charts from every sheet, bar/line/dot types).
-- 2026-11-08: Planned v2 from LaSER feedback (`docs/plan-v2.md`).
-- 2026-11-08: Environment setup, then the skills and `.claude` expansion (gotchas, wrap-up, UI/UX, Matt Pocock, Ponytail).
+- 2026-11-08: Parser v3 + data panel; three-pane editor; SVG comparison vs designer files + fixes; LaSER questions file.
+- 2026-11-08: Built v2 chart types (bar/line/dot, one chart per sheet); planned v2 from LaSER feedback.
+- 2026-11-08: Environment setup (local Postgres + dev auth bypass, Playwright, Vitest, CI) and the `.claude` setup (skills, hooks, gotchas, wrap-up).
 
 ## Suggested skills for the next session
-- `preview`: see the app before and after any UI change.
-- `prototype`, `frontend-ui`, `ui-ux-pro-max`: for the mobile editor layout.
-- `wrap-up`: at the end.
+- `preview`: screenshot before and after any visible change, and send it to the user (they are on a phone).
+- `chart-spec` + the `chart-spec-reviewer` agent: any change to the renderers.
+- `e2e-testing` / `tdd`: new features. `tests/parser-cases.test.js` for any parser change.
+- `frontend-ui`, `ui-ux-pro-max`, `prototype`: UI work (desktop-first).
+- `ship`, then `wrap-up` at the end.
