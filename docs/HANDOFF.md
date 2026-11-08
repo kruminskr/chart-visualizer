@@ -8,7 +8,7 @@ Branch `claude/dev-environment-setup-4an2ao` (pushed; CI green; **not merged to 
 - **Verified against the designer's SVGs** (`docs/svg-comparison.md`): sizes, colours, strokes and fonts match.
 
 ## Next steps
-0. **Design status: `docs/design-status.md`** (flow, chart types, decisions, what waits on LaSER). **UX round 2:** the user sends LaSER `docs/laser-questions.md` "2. kārta" with `docs/img/v3-*.png` and the mockups. Then build F2/F3 from `docs/research-ux-hosting.md` Part 5 based on their answers. **Hosting is on hold** (user leans to C; plan in Part 3).
+0. **Hosting: user chose B (Vercel + Neon, Better Auth, no storage). Plan: `docs/migration-plan-b.md`**, waiting on the decisions listed there. **Design status: `docs/design-status.md`** (flow, chart types, decisions, what waits on LaSER). **UX round 2:** the user sends LaSER `docs/laser-questions.md` "2. kārta" with `docs/img/v3-*.png` and the mockups. Then build F2/F3 from `docs/research-ux-hosting.md` Part 5 based on their answers. **Hosting is on hold** (user leans to C; plan in Part 3).
 1. Send `docs/laser-questions.md` (Latvian, ready). Record the answers there and update `docs/plan-v2.md`.
 2. Work that needs no LaSER input: a paste-a-table input (same parser); Excel templates per chart type; export all charts as a zip; duplicate a chart; wrapping long category labels and long legends; negative values in stacked/horizontal bars; undo.
 3. After LaSER answers: lock the country colours, an optional header block (figure no., title, source, note), CMYK/PDF if needed, dot-plot rating bands, group order, Latvian UI.
