@@ -21,7 +21,14 @@ React 19 + Next.js 16 (App Router), D3.js, SheetJS (xlsx), Tailwind CSS v4 (`@ta
 `.env.local` (created from `.env.example`) sets `DEV_AUTH_BYPASS=true` and points Prisma at a local Postgres (`laser_dev`). In that mode `lib/auth.js#getUser()` and `proxy.js` treat every request as the fixed user `dev@laser.local`, and `/api/upload` writes to `.dev-uploads/` instead of Supabase Storage. The bypass is hard-disabled when `NODE_ENV=production` (any `next build`/Vercel deploy). Always use `getUser()` from `@/lib/auth` server-side — never call `supabase.auth.getUser()` directly.
 
 ## Working style for this repo
-The user mostly prompts from a phone. After any visible change: run the app, screenshot it (`preview` skill), look at the PNG, and send it with SendUserFile. Finish work with the `ship` skill (lint + unit + e2e, commit, push, short summary). Project skills live in `.claude/skills/` (`preview`, `e2e-testing`, `chart-spec`, `frontend-ui`, `ship`); review agents in `.claude/agents/` (`chart-spec-reviewer`, `ui-reviewer`). A PostToolUse hook lints every edited JS/JSX file.
+- **Start of session:** read `docs/HANDOFF.md` (current state + next steps). **End of session:** `wrap-up` skill.
+- The user mostly prompts from a phone. After any visible change: screenshot it (`preview`), look at the PNG, send it with SendUserFile.
+- Finish work with `ship` (lint + unit + e2e, commit, push, short summary); no success claims without fresh evidence (`verification-before-completion`).
+- Hit something surprising or got corrected → record it with the `gotchas` skill.
+- Skill catalog with sources: `.claude/skills/README.md`. Review agents: `.claude/agents/`. Hooks: lint on edit, destructive-git blocker, session setup.
+
+@.claude/context/ponytail.md
+@.claude/context/gotchas.md
 
 ## Directory structure
 - `app/` — Next.js App Router pages and layouts

@@ -22,6 +22,13 @@ The audience is researchers making publication-ready charts. The app is a **quie
 - **Motion:** only in response to user action (saving, loading, opening). No entrance animations.
 - **Quality floor:** visible keyboard focus, labelled inputs, real `<button>`s, works at a 390 px phone width (dashboard grid, auth pages), and `prefers-reduced-motion` respected.
 
+## Taste toolkit (use in this order)
+1. **Direction:** the principles above, plus Anthropic's frontend-design guidance (plan tokens, critique the plan against the brief, spend boldness in one place).
+2. **Data-backed choices:** `ui-ux-pro-max`. Search `--domain ux` for the interaction or accessibility outcome and `--stack nextjs` / `html-tailwind` for the implementation. Use `--design-system` for app-wide direction. Read `design-system/laser-charts/MASTER.md` first if it exists.
+3. **Not sure what it should look like?** Use `prototype` to show 2–3 structurally different variants on the real route with `?variant=`, screenshot each one, send them to the user, and let them pick.
+4. **Audit:** `web-design-guidelines` (Vercel Web Interface Guidelines) on the changed files, then the `ui-reviewer` agent on the screenshots.
+5. **React/Next performance:** `react-best-practices` when you touch data fetching, server/client boundaries, or bundle size.
+
 ## Workflow
 1. Read the components involved. Reuse the existing class patterns (`inputClass`/`labelClass` in `ChartControls`).
 2. Make the change.
