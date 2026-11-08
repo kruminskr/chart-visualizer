@@ -22,7 +22,7 @@ React 19 + Next.js 16 (App Router), D3.js, SheetJS (xlsx), Tailwind CSS v4 (`@ta
 
 ## Working style for this repo
 - **Start of session:** read `docs/HANDOFF.md` (current state + next steps). **End of session:** `wrap-up` skill.
-- The user mostly prompts from a phone. After any visible change: screenshot it (`preview`), look at the PNG, send it with SendUserFile.
+- The user prompts from a phone, but the app is used on a **PC** (design desktop-first). After any visible change: screenshot it (`preview`), look at the PNG, send it with SendUserFile. Current roadmap: `docs/plan-v2.md`.
 - Finish work with `ship` (lint + unit + e2e, commit, push, short summary); no success claims without fresh evidence (`verification-before-completion`).
 - Hit something surprising or got corrected → record it with the `gotchas` skill.
 - Skill catalog with sources: `.claude/skills/README.md`. Review agents: `.claude/agents/`. Hooks: lint on edit, destructive-git blocker, session setup.
