@@ -8,7 +8,7 @@ Branch `claude/dev-environment-setup-4an2ao` (pushed; CI green; **not merged to 
 - **Verified against the designer's SVGs** (`docs/svg-comparison.md`): sizes, colours, strokes and fonts match.
 
 ## Next steps
-0. **Waiting on the user's decisions from `docs/research-ux-hosting.md`** (UX: "workbook in → set out" with a check grid, ZIP export, simple editor with "More options", replace workbook while keeping adjustments; hosting: recommended option B = Neon + Better Auth (or Cloudflare Access) + Vercel Pro or Netlify, and drop Supabase Storage). Build whatever they pick, UX quick wins first.
+0. **Waiting on answers to the UX questions and hosting choice in `docs/research-ux-hosting.md` Part 4** (round 1). The hosting plan: remove Supabase (Better Auth + no file storage, §3.1), then deploy on B = Vercel Hobby + Neon (§3.5). LaSER-bound questions still need translating into `docs/laser-questions.md`.
 1. Send `docs/laser-questions.md` (Latvian, ready). Record the answers there and update `docs/plan-v2.md`.
 2. Work that needs no LaSER input: a paste-a-table input (same parser); Excel templates per chart type; export all charts as a zip; duplicate a chart; wrapping long category labels and long legends; negative values in stacked/horizontal bars; undo.
 3. After LaSER answers: lock the country colours, an optional header block (figure no., title, source, note), CMYK/PDF if needed, dot-plot rating bands, group order, Latvian UI.
