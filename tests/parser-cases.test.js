@@ -131,6 +131,11 @@ describe('file formats', () => {
     expect(s.title).toBe('Virsraksts par datiem');
     expect(shape(s)).toEqual({ cats: ['2019', '2020'], series: { LV: [1.5, 3], EE: [2, 4.25] } });
   });
+  it('Latvian CSV whose title line contains a comma still splits on semicolons', () => {
+    const s = csv('Pētniecības izdevumi, % no IKP\nValsts;Izdevumi\nVācija;3,1\nLatvija;0,8\nES-27;2,2\n');
+    expect(s.title).toBe('Pētniecības izdevumi, % no IKP');
+    expect(shape(s)).toEqual({ cats: ['Vācija', 'Latvija', 'ES-27'], series: { Izdevumi: [3.1, 0.8, 2.2] } });
+  });
   it('English CSV: commas and decimal points', () => {
     expect(shape(csv('Year,LV\n2019,1.5\n2020,"1,234.5"\n')).series).toEqual({ LV: [1.5, 1234.5] });
   });

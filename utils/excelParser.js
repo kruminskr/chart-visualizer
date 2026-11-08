@@ -36,7 +36,7 @@ export function parseWorkbook(buf) {
     // (SheetJS would read it as 15 with a comma as thousands separator).
     const opts = { cellDates: true, cellNF: true, cellStyles: true, raw: true };
     const text = decodeText(buf);
-    wb = text != null ? XLSX.read(text, { ...opts, type: 'string' }) : XLSX.read(buf, { ...opts, type: 'array' });
+    wb = text != null ? XLSX.read(text, { ...opts, type: 'string', FS: csvSeparator(text) }) : XLSX.read(buf, { ...opts, type: 'array' });
   } catch {
     return { sheets: [], error: 'The file could not be read as a spreadsheet.' };
   }
@@ -64,6 +64,15 @@ function decodeText(buf) {
   } catch {
     return new TextDecoder('windows-1257').decode(bytes);
   }
+}
+
+/**
+ * SheetJS guesses the CSV separator from the first line, so a title like "Izdevumi, % no IKP" made it split
+ * a semicolon file on commas. Tab or ";" on most lines wins (Excel's CSV with a decimal comma uses ";").
+ */
+function csvSeparator(text) {
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  return ['\t', ';'].find(sep => lines.filter(l => l.includes(sep)).length >= lines.length / 2); // undefined → SheetJS default
 }
 
 // ── Cells ────────────────────────────────────────────────────────────────────
