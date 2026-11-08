@@ -43,7 +43,7 @@ try {
       mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       buffer: XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' }),
     });
-    await page.locator('main svg[viewBox]').waitFor();
+    await page.locator('[data-role="artboard"] svg').waitFor();
   } else {
     await page.goto(new URL(target, base).toString(), { waitUntil: 'networkidle' });
   }

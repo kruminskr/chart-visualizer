@@ -70,7 +70,7 @@ test('workbook → sheet picker → one chart per sheet', async ({ page }) => {
 
   // Sheet 4: horizontal bars grouped by country (merged cells)
   await tabs.nth(3).click();
-  const svg = page.locator('main svg[viewBox]');
+  const svg = page.locator('[data-role="artboard"] svg');
   await expect(svg.getByText('Igaunija')).toBeVisible();
   expect(new Set(await fills(svg.locator('g[transform] rect')))).toEqual(new Set([MAGENTA, LIGHT_PINK, DARK]));
 
@@ -148,4 +148,29 @@ test('edits autosave and survive reload', async ({ page }) => {
 
   await page.reload();
   await expect(page.getByPlaceholder('Chart title')).toHaveValue('Autosave check');
+});
+
+test('Latvian CSV → data panel: unit, exclude a row, swap rows/columns', async ({ page }) => {
+  await createProject(page);
+  const csv = 'Izdevumi pa gadiem\n(milj. EUR)\nGads;Latvija;Igaunija\n2019;1,5;2\n2020;;2,5\n2021;3;4,25\nKopā;4,5;8,75\n\nAvots: Eurostat\n';
+  const svg = await uploadFixture(page, { name: 'dati.csv', mimeType: 'text/csv', buffer: Buffer.from(csv) });
+
+  await expect(page.getByLabel('Axis unit (top right)')).toHaveValue('milj. EUR');
+  await expect(svg.getByText('milj. EUR')).toBeVisible();
+
+  const panel = page.getByRole('region', { name: 'Data' });
+  await panel.getByRole('button', { name: /Data/ }).click();
+  await expect(panel.getByText('Avots: Eurostat')).toBeVisible();
+  await expect(panel.getByText('4,25')).toBeVisible(); // decimal comma read correctly
+  await expect(panel.getByRole('row')).toHaveCount(5); // header + 4 rows (gap row kept)
+
+  // Leave out the total row
+  const before = await svg.locator('g[transform] rect').count();
+  await panel.getByLabel('Include row Kopā').uncheck();
+  await expect(svg.locator('g[transform] rect')).toHaveCount(before - 2);
+  await expect(panel.getByText('1 hidden')).toBeVisible();
+
+  // Swap: countries become categories
+  await panel.getByRole('button', { name: 'Swap rows / columns' }).click();
+  await expect(svg.locator('[data-role="legend"]').getByText('2019')).toBeVisible();
 });

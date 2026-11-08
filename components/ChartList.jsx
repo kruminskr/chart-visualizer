@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { ChartIcon } from '@/components/ChartIcons';
+import { ACCEPTED_FILES } from '@/utils/excelParser';
 
 const fmtMm = v => String(parseFloat(v) || '').replace('.', ',');
 
@@ -57,10 +58,10 @@ export default function ChartList({ charts, activeId, onSelect, onDelete, onFile
           onClick={() => inputRef.current?.click()}
           className="w-full py-2 px-3 text-sm rounded-md border border-dashed border-gray-300 text-gray-600 hover:border-gray-400 hover:text-gray-900 disabled:opacity-40"
         >
-          + Add charts from Excel
+          + Add charts from a file
         </button>
-        <p className="text-[11px] text-gray-400 mt-1.5 text-center">or drop an .xlsx anywhere</p>
-        <input ref={inputRef} type="file" accept=".xlsx" className="hidden" disabled={disabled}
+        <p className="text-[11px] text-gray-400 mt-1.5 text-center">or drop a file anywhere (.xlsx .xls .ods .csv)</p>
+        <input ref={inputRef} type="file" accept={ACCEPTED_FILES} className="hidden" disabled={disabled}
           onChange={e => { if (e.target.files[0]) onFile(e.target.files[0]); e.target.value = ''; }} />
       </div>
     </nav>

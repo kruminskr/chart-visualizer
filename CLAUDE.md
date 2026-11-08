@@ -33,7 +33,8 @@ React 19 + Next.js 16 (App Router), D3.js, SheetJS (xlsx), Tailwind CSS v4 (`@ta
 ## Directory structure
 - `app/` — Next.js App Router pages and layouts
 - `components/` — React components (all have `"use client"` since they use hooks or browser APIs)
-- `utils/` — pure client-side utilities (excelParser, svgExporter, chartHelpers)
+- `utils/` — pure client-side utilities (`excelParser` = find-the-table parser for xlsx/xls/ods/csv, `format` = lv numbers/labels, `svgExporter`)
+- `components/charts/` — Bar/Line/Dot renderers + shared `common.jsx`; editor = `ChartList` | `ChartPreview` + `DataPanel` | `Inspector`
 - `lib/` — server-side singletons (Prisma client, Supabase clients, `auth.js` user helper)
 - `prisma/` — database schema
 - `proxy.js` — Next 16 route protection (replaces middleware)

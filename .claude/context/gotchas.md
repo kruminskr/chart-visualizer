@@ -16,6 +16,8 @@ Things that already cost a session time. Each entry follows one format. **When**
 - **When** you need to widen `permissions.allow` in `.claude/settings.json`. **Do** propose the exact lines and let the user add them. **Else** auto mode denies it as self-modification. Adding hooks with the Edit tool worked; editing the file through a Bash or Python script did not.
 
 ## App behaviour
+- **When** you parse CSV or other text input. **Do** keep `raw: true` and the `decodeText` step in `utils/excelParser.js`. **Else** SheetJS reads "1,5" as 15 (comma as thousands) and UTF-8 "Kopā" as "KopÄ", and it does so without any error. Tests in `tests/parser-cases.test.js` cover both.
+- **When** a parser change touches table detection. **Do** run `tests/parser-cases.test.js`. It has 26+ real-world sheet layouts, and LaSER's sheet shapes are in `tests/fixtures/workbooks.js`. **Else** a silent misread (wrong but plausible data) reaches the chart.
 - **When** a client component loads data in `useEffect`. **Do** add a `cancelled` flag in the cleanup and block user input until `loaded`. **Else** React StrictMode loads twice in dev, and a late response overwrites the user's edits (the bug in `app/project/[id]/page.jsx`).
 - **When** you render relative times ("5 minutes ago") in an SSR client component. **Do** add `suppressHydrationWarning` to the element, or render the time on the client only. **Else** you get a hydration-mismatch console error.
 - **When** you add a pt-derived or D3-computed value to the SVG. **Do** wrap it in `rnd()`, including constants. **Else** the export contains `0.08819444444444444`, which breaks the spec. The e2e export test catches this.

@@ -7,7 +7,8 @@ import Inspector from '@/components/Inspector';
 import ChartPreview from '@/components/ChartPreview';
 import SheetPicker from '@/components/SheetPicker';
 import Header from '@/components/Header';
-import { parseFile, normalizeData } from '@/utils/excelParser';
+import { parseFile, normalizeData, isAcceptedFile, transposeData, applyExclusions } from '@/utils/excelParser';
+import DataPanel from '@/components/DataPanel';
 import { exportSVG } from '@/utils/svgExporter';
 
 const num = (v, d) => parseFloat(v) || d;
@@ -39,7 +40,7 @@ function defaultHeight(type, data) {
 function chartFromSheet(sheet) {
   const { type, config } = sheet.suggested;
   return {
-    type, title: sheet.title, unit: '',
+    type, title: sheet.title, unit: sheet.data.unit ?? '',
     widthMm: 165, heightMm: defaultHeight(type, sheet.data),
     data: sheet.data, config: { ...config, sheetName: sheet.name },
   };
@@ -131,8 +132,8 @@ export default function ProjectPage() {
 
   // ── Upload ──────────────────────────────────────────────────────────────
   async function handleFile(file) {
-    if (!file.name.toLowerCase().endsWith('.xlsx')) {
-      setError('Please upload an .xlsx file.');
+    if (!isAcceptedFile(file.name)) {
+      setError('Please upload an Excel (.xlsx, .xls), OpenDocument (.ods) or CSV file.');
       return;
     }
     const result = await parseFile(file);
@@ -190,8 +191,9 @@ export default function ProjectPage() {
   const widthMm = num(active?.widthMm, 165);
   const heightMm = num(active?.heightMm, 90);
   const hasData = active?.data?.series?.length > 0;
+  const shown = hasData ? applyExclusions(active.data, active.config?.exclude) : null;
 
-  // Drop an .xlsx anywhere on the page.
+  // Drop a spreadsheet anywhere on the page.
   const dropProps = {
     onDragOver: e => { if (loaded && e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDragging(true); } },
     onDragLeave: e => { if (e.currentTarget === e.target || !e.currentTarget.contains(e.relatedTarget)) setDragging(false); },
@@ -226,7 +228,7 @@ export default function ProjectPage() {
 
           <div className="relative flex-1 min-h-0 bg-[#F4F4F5]">
             {hasData ? (
-              <ChartPreview svgRef={svgRef} type={active.type} data={active.data} zoom={zoom}
+              <ChartPreview svgRef={svgRef} type={active.type} data={shown} zoom={zoom}
                 config={{ ...active.config, unit: active.unit }} widthMm={widthMm} heightMm={heightMm} />
             ) : !loaded ? (
               <p className="absolute inset-0 flex items-center justify-center text-sm text-gray-400">Loading…</p>
@@ -234,19 +236,25 @@ export default function ProjectPage() {
               <div className="absolute inset-0 flex items-center justify-center p-8">
                 <div className="text-center max-w-sm">
                   <p className="text-base text-gray-700">Upload an Excel file to get started</p>
-                  <p className="text-sm text-gray-500 mt-1">Each sheet with a title, a header row and data becomes a chart. Drop the file here or use “Add charts from Excel”.</p>
+                  <p className="text-sm text-gray-500 mt-1">Each sheet with a title, a header row and data becomes a chart. Drop the file here (.xlsx, .xls, .ods or .csv) or use “Add charts from a file”.</p>
                 </div>
               </div>
             )}
           </div>
+
+          {hasData && (
+            <DataPanel data={active.data} exclude={active.config?.exclude}
+              onExclude={exclude => updateActive({ config: { ...active.config, exclude } })}
+              onSwap={() => updateActive({ data: transposeData(active.data), config: { ...active.config, exclude: undefined, highlight: undefined, reference: undefined } })} />
+          )}
         </main>
 
-        {hasData && <Inspector chart={active} onChange={updateActive} />}
+        {hasData && <Inspector chart={{ ...active, data: shown }} onChange={updateActive} />}
       </div>
 
       {dragging && (
         <div className="pointer-events-none fixed inset-0 z-40 bg-gray-900/10 flex items-center justify-center">
-          <p className="rounded-lg bg-white px-5 py-3 text-sm text-gray-800 shadow-lg ring-1 ring-gray-200">Drop the .xlsx to create charts</p>
+          <p className="rounded-lg bg-white px-5 py-3 text-sm text-gray-800 shadow-lg ring-1 ring-gray-200">Drop the file to create charts</p>
         </div>
       )}
 

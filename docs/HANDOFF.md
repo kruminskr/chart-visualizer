@@ -23,6 +23,7 @@ Not done: P4 (header block with figure number, title and source; PDF/CMYK), dot-
 - Should CI also run e2e on every push, or only lint and unit tests? It currently runs all of them. (2026-11-08)
 
 ## Recent sessions
+- 2026-11-08: Parser v3 (finds the table anywhere, gaps, 2 header rows, units, swapped years, %, dates, hidden rows, xls/ods/csv incl. Latvian encodings) + data panel (warnings, exclude rows/series, swap).
 - 2026-11-08: Three-pane editor (chart list / canvas with zoom / inspector), SVG comparison vs designer files + fixes, LaSER questions file.
 - 2026-11-08: Built v2 P0–P3 (charts from every sheet, bar/line/dot types).
 - 2026-11-08: Planned v2 from LaSER feedback (`docs/plan-v2.md`).

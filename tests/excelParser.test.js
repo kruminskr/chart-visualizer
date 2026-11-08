@@ -52,7 +52,7 @@ describe('parseWorkbook', () => {
   });
 
   it('returns an error for an unrecognised structure', () => {
-    expect(parseWorkbook(invalidXlsx()).error).toMatch(/No data|numeric/);
+    expect(parseWorkbook(invalidXlsx()).error).toMatch(/No numbers found/);
   });
 });
 

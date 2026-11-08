@@ -20,7 +20,7 @@ export async function createProject(page) {
 /** Uploads a single-sheet fixture and waits for the chart SVG to render. */
 export async function uploadFixture(page, fixture) {
   await page.locator('input[type="file"]').setInputFiles(fixture);
-  const svg = page.locator('main svg[viewBox]');
+  const svg = page.locator('[data-role="artboard"] svg');
   await expect(svg).toBeVisible();
   return svg;
 }
