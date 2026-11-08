@@ -21,7 +21,7 @@ Branch `claude/dev-environment-setup-4an2ao` (pushed; CI green; **not merged to 
 - Should CI keep running e2e on every push? It takes about 1,5 min and is currently fine. (2026-11-08)
 
 ## Recent sessions
-- 2026-11-08: UX round 1: dashboard drop-to-start, chart thumbnails + warning counts, editable Data panel values; LaSER questions round 2 drafted; B vs C hosting breakdown.
+- 2026-11-08: UX round 1: chart thumbnails + warning counts, editable Data panel values; LaSER questions round 2 drafted; B vs C hosting breakdown.
 - 2026-11-08: Research only: UX deep dive (Datawrapper/Flourish/think-cell patterns, concept mockups in `docs/img/`) and hosting/auth/DB options → `docs/research-ux-hosting.md`.
 - 2026-11-08: Parser v3 + data panel; three-pane editor; SVG comparison vs designer files + fixes; LaSER questions file.
 - 2026-11-08: Built v2 chart types (bar/line/dot, one chart per sheet); planned v2 from LaSER feedback.

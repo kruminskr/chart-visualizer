@@ -11,12 +11,18 @@ const fills = loc => loc.evaluateAll(els => els.map(e => e.getAttribute('fill'))
 test('dashboard loads for the dev user', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveURL(/\/dashboard$/);
-  await expect(page.getByRole('heading', { name: 'Make charts from an Excel file' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Projects' })).toBeVisible();
 });
 
-test('dashboard: choosing a file opens a project named after it, straight into the sheet picker', async ({ page }) => {
+test('dashboard: dropping a file opens a project named after it, straight into the sheet picker', async ({ page }) => {
   await page.goto('/dashboard');
-  await page.getByLabel('Excel file').setInputFiles({ ...fixtures.workbook(), name: 'Petijums_2026.xlsx' });
+  const b64 = fixtures.workbook().buffer.toString('base64');
+  const dt = await page.evaluateHandle(data => {
+    const t = new DataTransfer();
+    t.items.add(new File([Uint8Array.from(atob(data), c => c.charCodeAt(0))], 'Petijums_2026.xlsx'));
+    return t;
+  }, b64);
+  await page.dispatchEvent('main', 'drop', { dataTransfer: dt });
   await page.waitForURL(/\/project\/[\w-]+$/);
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();

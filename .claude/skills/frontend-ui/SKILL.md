@@ -19,6 +19,7 @@ The audience is researchers making publication-ready charts. The app is a **quie
 - **Restraint.** Spend boldness in one place: the chart canvas. Don't add gradients, decorative shadows, or a card for everything.
 - **Structure is information.** Borders, dividers, and labels must encode something real (a group of controls, a state). They aren't decoration.
 - **Copy:** write from the user's perspective, sentence case, active verbs. A button says what it does ("Export SVG", "New project"). Errors say what went wrong and how to fix it (see the parser messages). An empty state invites action ("Upload an Excel file to get started").
+- **No marketing-style UI** (the user rejected it on 2026-11-08 as "cheap"): no hero drop zones, big explanatory headlines or onboarding copy in the app shell. Keep the plain heading + primary button pattern. Shortcuts such as drag-and-drop can exist, but stay invisible until they are used.
 - **Motion:** only in response to user action (saving, loading, opening). No entrance animations.
 - **Quality floor:** visible keyboard focus, labelled inputs, real `<button>`s, works at a 390 px phone width (dashboard grid, auth pages), and `prefers-reduced-motion` respected.
 

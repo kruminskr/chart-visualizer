@@ -224,7 +224,7 @@ The user answers what they can. The rest goes to LaSER (translate into `docs/las
 15. Probably no EU-only rule. The user likes C for its simplicity and price. **Hosting changes are on hold.**
 
 ### Built this round (UX quick wins that don't wait on LaSER)
-- **Start from the file:** the dashboard is now a drop zone ("Make charts from an Excel file"). Choosing a file creates a project named after it and opens the sheet picker directly. "+ Empty project" stays as a small link. Uploading into an "Untitled Project" also renames it after the file.
+- **Start from the file:** ~~the dashboard became a big drop zone~~. *The user rejected it as feeling cheap (2026-11-08) and the original "Projects" + "+ New Project" layout is back.* What remains: dropping a file anywhere on the dashboard creates a project named after it and opens the sheet picker (no visible UI until a file is dragged over), and uploading into an "Untitled Project" renames it after the file.
 - **Edit values in place:** every number in the Data panel is an input (Latvian decimal comma, empty = no value, unreadable input is rejected). The Excel file isn't changed.
 - **See the whole set:** the chart list shows a live thumbnail of each chart and a ⚠ count when the parser left notes.
 
@@ -233,7 +233,7 @@ Three directions, from least to most change. They aren't exclusive.
 
 | | Idea | What changes | Mockup |
 |---|---|---|---|
-| F1 | **Current editor, tidied** (built) | Drop-to-start, thumbnails, editable data. Everything else as now. | `img/v3-dashboard.png`, `img/v3-editor.png`, `img/v3-data-edit.png` |
+| F1 | **Current editor, tidied** (built) | Thumbnails, editable data, project named after the file. Everything else as now. | `img/v3-editor.png`, `img/v3-data-edit.png` |
 | F2 | **Set overview first** | After upload, a grid of all charts with warnings and a "Download all" button. Click a chart to edit it. Good if a paper has many charts. | `img/mock-review.png` |
 | F3 | **Simple editor** | The settings panel shows ~4 common controls. Everything else sits behind "More options". The right set depends on LaSER's answer to "which adjustments do you make". | `img/mock-edit.png` |
 
