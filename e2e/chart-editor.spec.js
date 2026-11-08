@@ -214,3 +214,37 @@ test('data panel: correct a value in place, bad input is rejected', async ({ pag
   await expect(cell).toHaveValue('1,5');
   await expect.poll(async () => Number(await bar.getAttribute('height'))).toBeLessThan(before);
 });
+
+test('uploading a single-sheet file into a project with a chart adds a new chart', async ({ page }) => {
+  await createProject(page);
+  await uploadFixture(page, fixtures.single());
+  const rail = page.getByRole('navigation', { name: 'Charts' });
+  await rail.locator('input[type="file"]').setInputFiles(fixtures.multi());
+  await expect(rail.locator('li > button:first-child')).toHaveCount(2);
+  await expect(rail.getByText('Valsts budžeta izdevumi pa gadiem')).toBeVisible(); // the first chart is untouched
+  await expect(page.getByPlaceholder('Chart title')).toHaveValue('Uzņēmumu skaits Baltijas valstīs pa gadiem');
+});
+
+test('switching bars → lines keeps value labels valid; close lines get separated labels', async ({ page }) => {
+  await createProject(page);
+  const svg = await uploadFixture(page, fixtures.multi()); // suggested: bars with labels inside
+  const settings = page.getByRole('complementary', { name: 'Chart settings' });
+  await settings.getByRole('button', { name: 'Lines' }).click();
+  await expect(settings.getByLabel('Value labels')).toHaveValue('none');
+  await expect(svg.locator('[data-role="value"]')).toHaveCount(0);
+
+  await settings.getByLabel('Value labels').selectOption('all');
+  // Plain numbers: an SVGRect doesn't serialise out of the page. Digits are ~0.7 em tall above the baseline,
+  // so labels that share x must have baselines at least that far apart, plus a small gap.
+  const labels = await svg.locator('[data-role="value"]').evaluateAll(els => els.map(e => {
+    const b = e.getBBox();
+    return { x: b.x, w: b.width, base: Number(e.getAttribute('y')) };
+  }));
+  expect(labels.length).toBe(18);
+  const fontMm = Number(await svg.locator('[data-role="value"]').first().getAttribute('font-size'));
+  const minGap = fontMm * 0.7 + 0.4;
+  for (let i = 0; i < labels.length; i++) for (let j = i + 1; j < labels.length; j++) {
+    const a = labels[i], b = labels[j];
+    if (a.x < b.x + b.w && b.x < a.x + a.w) expect(Math.abs(a.base - b.base), `labels ${i} and ${j}`).toBeGreaterThanOrEqual(minGap);
+  }
+});

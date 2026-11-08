@@ -3,7 +3,7 @@
 import { forwardRef } from 'react';
 import { scalePoint, scaleLinear, line, area } from 'd3';
 import { seriesColors, tint, GRID } from '@/lib/palette';
-import { formatNumber, formatCategory, decimalsForStep, thinLabels, autoDecimals } from '@/utils/format';
+import { formatNumber, formatCategory, decimalsForStep, thinLabels, autoDecimals, placePointLabels } from '@/utils/format';
 import { rnd, FONT, STROKE, LINE_1, LINE_MULTI, FONT_PROPS, LEGEND_H, Legend, FontImport, textWidth, tickCount } from './common';
 
 const MR = 5;
@@ -25,7 +25,7 @@ const LineChart = forwardRef(function LineChart({ data, config = {}, widthMm, he
   const strokeW = multi ? LINE_MULTI : LINE_1;
 
   const all = series.flatMap(s => s.values).filter(v => v != null);
-  const valueLabels = config.valueLabels ?? 'none';
+  const valueLabels = ['ends', 'all'].includes(config.valueLabels) ? config.valueLabels : 'none'; // bar modes don't apply
   const valueDecimals = config.decimals ?? autoDecimals(all);
   const MT = (showLegend ? LEGEND_H : 0) + FONT + 1;
   const MB = LABEL_GAP + FONT * 1.2 + 0.5;
@@ -56,6 +56,18 @@ const LineChart = forwardRef(function LineChart({ data, config = {}, widthMm, he
     else if (!clashes(prev, b) && !clashes(b, last)) kept.push(b);
   }
 
+  // Value labels: which points get one, then per x keep labels of close lines apart.
+  const labelled = series.map(s => {
+    const defined = s.values.map((d, k) => (d != null ? k : null)).filter(k => k != null);
+    return s.values.map((v, i) => v != null && valueLabels !== 'none' && (valueLabels === 'all' || i === defined[0] || i === defined.at(-1)));
+  });
+  const labelY = series.map(() => []);
+  categories.forEach((_, i) => {
+    const at = series.map((_, si) => si).filter(si => labelled[si][i]);
+    const ys = placePointLabels(at.map(si => y(series[si].values[i])), { gap: 1.4, height: FONT * 0.95, below: 1.4 + FONT * 0.7 });
+    at.forEach((si, k) => { labelY[si][i] = ys[k]; });
+  });
+
   const lineGen = line().defined(d => d != null).x((_, i) => px(i)).y(d => py(d));
   const areaGen = area().defined(d => d != null).x((_, i) => px(i)).y0(py(Math.max(0, tmpY.domain()[0]))).y1(d => py(d));
 
@@ -81,15 +93,11 @@ const LineChart = forwardRef(function LineChart({ data, config = {}, widthMm, he
               {markers && s.values.map((v, i) => v != null && (
                 <circle key={i} cx={px(i)} cy={py(v)} r={MARKER_R} fill={colors[si]} />
               ))}
-              {valueLabels !== 'none' && s.values.map((v, i) => {
-                const defined = s.values.map((d, k) => (d != null ? k : null)).filter(k => k != null);
-                if (v == null || (valueLabels === 'ends' && i !== defined[0] && i !== defined.at(-1))) return null;
-                return (
-                  <text key={`v${i}`} x={px(i)} y={rnd(y(v) - 1.4)} textAnchor="middle" {...FONT_PROPS} fill={colors[si]} data-role="value">
-                    {formatNumber(v, valueDecimals)}
-                  </text>
-                );
-              })}
+              {s.values.map((v, i) => labelled[si][i] && (
+                <text key={`v${i}`} x={px(i)} y={rnd(labelY[si][i])} textAnchor="middle" {...FONT_PROPS} fill={colors[si]} data-role="value">
+                  {formatNumber(v, valueDecimals)}
+                </text>
+              ))}
             </g>
           ))}
           {kept.map(({ i, k }) => (

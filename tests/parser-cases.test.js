@@ -26,6 +26,16 @@ describe('table location', () => {
     expect(s.title).toBe(T[0]);
     expect(shape(s)).toEqual({ cats: ['2019', '2020'], series: { LV: [1, 3], EE: [2, 4] } });
   });
+  it('header that is only a year ("Valsts | 2023") is a header, not data', () => {
+    const s = sheetOf([T, ['Valsts', 2023], ['Vācija', 3.1], ['Latvija', 0.8]]);
+    expect(shape(s)).toEqual({ cats: ['Vācija', 'Latvija'], series: { 2023: [3.1, 0.8] } });
+    const c = csv('Izdevumi, % no IKP\nValsts;2023\nVācija;3,1\nLatvija;0,8\n');
+    expect(shape(c)).toEqual({ cats: ['Vācija', 'Latvija'], series: { 2023: [3.1, 0.8] } });
+  });
+  it('a first data row whose value looks like a year stays data when the column holds years', () => {
+    const s = sheetOf([T, ['Rīga', 2019], ['Cēsis', 2021]]);
+    expect(shape(s)).toEqual({ cats: ['Rīga', 'Cēsis'], series: { '': [2019, 2021] } });
+  });
   it('no title / no header', () => {
     expect(shape(sheetOf([['Gads', 'LV'], [2019, 1], [2020, 2]])).series).toEqual({ LV: [1, 2] });
     expect(shape(sheetOf([[2019, 1], [2020, 2]])).series).toEqual({ '': [1, 2] });

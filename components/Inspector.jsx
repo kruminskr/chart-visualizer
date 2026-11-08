@@ -148,7 +148,7 @@ export default function Inspector({ chart, onChange }) {
       {type !== 'dot' && (
         <Section title="Labels">
           <Field label="Value labels">
-            <select className={inputClass} value={config.valueLabels ?? 'none'} onChange={e => setConfig({ valueLabels: e.target.value })}>
+            <select className={inputClass} value={(type === 'bar' ? ['inside', 'outside'] : ['ends', 'all']).includes(config.valueLabels) ? config.valueLabels : 'none'} onChange={e => setConfig({ valueLabels: e.target.value })}>
               <option value="none">None</option>
               {type === 'bar' ? (
                 <>

@@ -38,7 +38,7 @@ const BarChart = forwardRef(function BarChart({ data, config = {}, widthMm, heig
   const { categories, series } = sortData(data, config.sort);
   const horizontal = config.orientation === 'horizontal';
   const stacked = !!config.stacked && series.length > 1;
-  const valueLabels = config.valueLabels ?? 'none';
+  const valueLabels = ['inside', 'outside'].includes(config.valueLabels) ? config.valueLabels : 'none'; // line modes don't apply
   const barWidth = config.barWidth ?? defaultBarWidth(config, data);
   const names = series.map(s => s.name);
   const colors = seriesColors(names, config.seriesColors);

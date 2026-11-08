@@ -42,3 +42,22 @@ export function thinLabels(total, maxLabels = 14) {
   idx.push(total - 1);
   return idx;
 }
+
+/**
+ * Baselines for value labels of several points at one x (SVG y grows downward), in input order.
+ * Each label sits `gap` above its point. If the lowest label would touch the next label or cover the next point,
+ * it goes `below` under its point;
+ * the others are pushed up so no two labels are closer than `height`.
+ */
+export function placePointLabels(ys, { gap, height, below }) {
+  const order = ys.map((_, i) => i).sort((a, b) => ys[a] - ys[b]); // top first
+  const out = ys.map(y => y - gap);
+  const n = order.length;
+  // The lowest label goes below its point if, above it, it would touch the next label or cover the next point.
+  if (n > 1 && ys[order[n - 1]] - ys[order[n - 2]] < gap + height) out[order[n - 1]] = ys[order[n - 1]] + below;
+  for (let k = n - 2; k >= 0; k--) {
+    const lower = out[order[k + 1]];
+    if (lower - out[order[k]] < height) out[order[k]] = lower - height;
+  }
+  return out;
+}

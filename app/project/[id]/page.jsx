@@ -155,11 +155,11 @@ export default function ProjectPage() {
     let replaceId = null;
     for (const [i, sheet] of sheets.entries()) {
       const fields = chartFromSheet(sheet);
-      // The first sheet fills the active chart if it is empty, or replaces its data on a single-sheet upload.
-      if (i === 0 && active && (!active.data || sheets.length === 1)) {
+      // The first sheet fills the active chart only if it is empty; otherwise every sheet becomes a new chart
+      // (replacing an existing chart's data on upload surprised users).
+      if (i === 0 && active && !active.data?.series?.length) {
         replaceId = active.id;
-        const keep = active.data ? { type: active.type, config: { ...active.config, sheetName: sheet.name } } : {};
-        setCharts(list => list.map(c => (c.id === active.id ? { ...c, ...fields, ...keep, id: c.id, widthMm: c.widthMm } : c)));
+        setCharts(list => list.map(c => (c.id === active.id ? { ...c, ...fields, id: c.id, widthMm: c.widthMm } : c)));
       } else {
         created.push(await createChart(fields));
       }

@@ -212,6 +212,12 @@ export function parseSheet(sheet) {
   const noNumbers = r => !r.slice(1).some(isNum);
   let h = 0;
   while (h < 2 && h < block.length - 1 && noNumbers(block[h]) && block[h].slice(1).some(Boolean)) h++;
+  // A header of years only ("Valsts | 2023") holds numbers, so the rule above misses it. It's a header when the
+  // values under each year are not years themselves (otherwise "Rīga | 2019" may be a real first data row).
+  if (h === 0 && block.length > 2 && (block[0][0] == null || isText(block[0][0]))) {
+    const cols = block[0].map((c, j) => (j > 0 && c ? j : null)).filter(j => j != null);
+    if (cols.length && cols.every(j => isYearValue(block[0][j]) && !block.slice(1).some(r => isYearValue(r[j])))) h = 1;
+  }
   let names = block[0].map(() => '');
   const labelOf = c => (c == null ? '' : c.text || (c.num != null ? String(c.num) : ''));
   if (h >= 1) names = block[h - 1].map(labelOf);
